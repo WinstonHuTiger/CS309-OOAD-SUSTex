@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "antd": "^3.24.2",
     "babel-plugin-import": "^1.12.1",
     "codemirror": "^5.48.4",
     "customize-cra": "^0.8.0",
