@@ -8,19 +8,29 @@ import 'codemirror/addon/hint/show-hint.js';
 import 'codemirror/addon/hint/show-hint.css';
 import javascriptHint from 'codemirror/addon/hint/javascript-hint.js';
 var codeMirror;
-class Editor extends Component {
+class MarkdownEditor extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: this.props.text
+    };
+  }
   componentDidMount = () => {
     codeMirror = CodeMirror(this.editor, {
      mode: 'markdown',
      lineNumbers: true,
      indentWithTabs: true,
      lineWrapping: true,
-     indentWithTabs: true
+     indentWithTabs: true,
+     value: this.state.text
    });
    CodeMirror.registerHelper("hint","javascript", javascriptHint);
-   codeMirror.on('change', function() {
-       codeMirror.showHint();  //满足自动触发自动联想功能
+   codeMirror.on('change',() => {
+     this.setState({
+       text: codeMirror.getValue()
      });
+     this.props.updateFater(this.state.text);
+   });
   };
   ref = React.createRef();
   render = () => (
@@ -28,4 +38,4 @@ class Editor extends Component {
   );
 }
 
-export default Editor;
+export default MarkdownEditor;

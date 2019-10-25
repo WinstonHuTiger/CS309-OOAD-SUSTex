@@ -6,7 +6,8 @@ import Scrollbars from 'react-custom-scrollbars';
 import MarkdownRender from '../components/MarkdownRender';
 import Lightbox from 'react-lightbox-component';
 import './lightbox.css';
-import Editor from '../components/Editor';
+import MarkdownEditor from '../components/MarkdownEditor';
+import LatexEditor from '../components/LatexEditor';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -15,6 +16,7 @@ const ReactMarkdown = require('react-markdown');
 
 class ProjectPage extends React.Component {
   state = {
+    mode: "latex",
     isLoading: true,
     collapsed: false,
     modalIsOpen: true,
@@ -113,10 +115,10 @@ class ProjectPage extends React.Component {
               </Popover>
               </Menu.Item>
             </SubMenu>
-            <Menu.Item key="/markdown.md" className="file">
+            <Menu.Item key="/markdown.md" className="file" onClick={this.markdownFile}>
               <Icon type="file-text" />markdown.md
             </Menu.Item>
-            <Menu.Item key="/latex.tex" className="file">
+            <Menu.Item key="/latex.tex" className="file" onClick={this.latexFile}>
               <Icon type="file-text" />latex.tex
             </Menu.Item>
           </Menu>
@@ -125,20 +127,46 @@ class ProjectPage extends React.Component {
             <Button id="trigger" icon={isCollapsed?"right":"left"} shape="circle" onClick={this.toggle}/>
             <Row className="content-row">
               <Col span={12}>
-                <Editor />
+                {this.state.mode == "markdown" ? (
+                  <MarkdownEditor
+                    updateFater={this.getEditorText}
+                    text={this.state.value}
+                    />
+                ):(
+                  <LatexEditor
+                    updateFater={this.getEditorText}
+                    text={this.state.value}
+                    />
+                )}
               </Col>
               <Col span={12}>
                 <MarkdownRender
                   className="markdown"
-                  source={this.state.value} />
+                  source={this.state.value}
+                  />
               </Col>
             </Row>
           </Content>
         </Layout>
-
       </Layout>
     );
   }
+  getEditorText = (text) => {
+    this.setState({
+      value: text
+    });
+  }
+  latexFile = () => {
+    this.setState({
+      value: "latex",
+      mode: "latex"
+    });
+  }
+  markdownFile = () => {
+    this.setState({
+      value: "markdown",
+      mode: "markwodn"
+    })
+  }
 }
-
 export default ProjectPage;
