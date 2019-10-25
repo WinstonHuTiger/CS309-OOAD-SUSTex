@@ -6,7 +6,7 @@ function MarkdownRender(props) {
   md.use(mk);
   var result = md.render(props['source']);
   return (
-      <article class="markdown-body" id="markdown" dangerouslySetInnerHTML={{__html: result}}>
+      <article className="markdown-body" id="markdown" dangerouslySetInnerHTML={{__html: result}}>
       </article>
   );
 }
