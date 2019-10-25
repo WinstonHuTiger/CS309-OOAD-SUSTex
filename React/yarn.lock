@@ -2717,9 +2717,9 @@ code-point-at@^1.0.0:
   resolved "https://registry.npm.taobao.org/code-point-at/download/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-codemirror@^5.48.4:
+codemirror@^5.49.2:
   version "5.49.2"
-  resolved "https://registry.npm.taobao.org/codemirror/download/codemirror-5.49.2.tgz#c84fdaf11b19803f828b0c67060c7bc6d154ccad"
+  resolved "https://registry.npm.taobao.org/codemirror/download/codemirror-5.49.2.tgz?cache=0&sync_timestamp=1571638982850&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcodemirror%2Fdownload%2Fcodemirror-5.49.2.tgz#c84fdaf11b19803f828b0c67060c7bc6d154ccad"
   integrity sha1-yE/a8RsZgD+CiwxnBgx7xtFUzK0=
 
 collapse-white-space@^1.0.2:
@@ -9157,11 +9157,6 @@ react-app-rewired@^2.1.3:
   integrity sha1-fYux9lWWk/iTytyJDUC1QEAkAMw=
   dependencies:
     semver "^5.6.0"
-
-react-codemirror2@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.npm.taobao.org/react-codemirror2/download/react-codemirror2-6.0.0.tgz#180065df57a64026026cde569a9708fdf7656525"
-  integrity sha1-GABl31emQCYCbN5WmpcI/fdlZSU=
 
 react-custom-scrollbars@^4.2.1:
   version "4.2.1"

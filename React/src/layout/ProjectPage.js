@@ -1,14 +1,12 @@
 import React from 'react';
 import { Layout, Menu, Breadcrumb, Icon, Button, Row, Col, Input, Popover } from 'antd';
 import './custom.css';
-import {Controlled as CodeMirror} from 'react-codemirror2'
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material.css';
 import 'github-markdown-css/github-markdown.css';
 import Scrollbars from 'react-custom-scrollbars';
 import MarkdownRender from '../components/MarkdownRender';
 import Lightbox from 'react-lightbox-component';
 import './lightbox.css';
+import Editor from '../components/Editor';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -127,19 +125,7 @@ class ProjectPage extends React.Component {
             <Button id="trigger" icon={isCollapsed?"right":"left"} shape="circle" onClick={this.toggle}/>
             <Row className="content-row">
               <Col span={12}>
-                <CodeMirror
-                  value={this.state.value}
-                  options={{
-                    theme: 'tomorrow',
-                    lineNumbers: true,
-                    lineWrapping: true
-                  }}
-                  onBeforeChange={(editor, data, value) => {
-                    this.setState({value: value});
-                  }}
-                  onChange={(editor, data, value) => {
-                  }}
-                />
+                <Editor />
               </Col>
               <Col span={12}>
                 <MarkdownRender
