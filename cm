@@ -1,0 +1,3 @@
+cm.getCursor()
+cm.getTokenAt(cm.getCursor())
+lineWrapping:true,
