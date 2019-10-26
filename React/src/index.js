@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import NavigationBar from './components/NavigationBar';
-import ProjectPage from './layout/ProjectPage'
+import ProjectPage from './layout/ProjectPage';
 
 ReactDOM.render(<ProjectPage />, document.getElementById('root'));
 

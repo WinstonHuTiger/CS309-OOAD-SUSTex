@@ -1,21 +1,13 @@
 import CodeMirror from 'codemirror/lib/codemirror.js';
-import 'codemirror/mode/javascript/javascript.js';
 import React, { Component } from 'react';
-import 'codemirror/mode/markdown/markdown';
+import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
 import 'codemirror/addon/hint/show-hint.js';
 import 'codemirror/addon/lint/lint.js';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
-import javascriptHint from 'codemirror/addon/hint/javascript-hint.js';
-import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
 import '../grammar/latex.js';
-
-
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/hint/show-hint.css';
-import 'codemirror/addon/fold/foldgutter.css';
-import 'codemirror/theme/tomorrow-night-bright.css';
+import './editor-theme/base16-tomorrow-light.css';
 
 var codeMirror;
 // 1. a partial latex grammar in simple JSON format
@@ -30,7 +22,7 @@ class LatexEditor extends Component {
   }
   componentDidMount = () => {
     // 2. parse the grammar into a Codemirror syntax-highlight mode
-    var latex_mode = CodeMirrorGrammar.getMode(global.constants.latex_grammar);
+    var latex_mode = CodeMirrorGrammar.getMode(global.constants.latex_grammar, null, CodeMirror);
     // 3. use it with Codemirror
     CodeMirror.defineMode("latex", latex_mode);
     console.log(latex_mode)
@@ -53,8 +45,8 @@ class LatexEditor extends Component {
         }
     });
     // enable syntax lint-like validation in the grammar
-    latex_mode.supportGrammarAnnotations = true;
-    CodeMirror.registerHelper("lint", "latex", latex_mode.validator);
+    // latex_mode.supportGrammarAnnotations = true;
+    // CodeMirror.registerHelper("lint", "latex", latex_mode.validator);
     // enable user-defined autocompletion (if defined)
     latex_mode.supportAutoCompletion = true;
     console.log(latex_mode.autocompleter)
@@ -77,6 +69,7 @@ class LatexEditor extends Component {
         matching: true,  // enable token matching, e.g braces, tags etc..
         extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment", "Ctrl" : () => { console.log(CodeMirror.Pos(1, 2));}},
         foldGutter: true,
+        theme: "base16-tomorrow-light",
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]
     });
    codeMirror.on('change',() => {
@@ -84,9 +77,16 @@ class LatexEditor extends Component {
        text: codeMirror.getValue()
      });
      this.props.updateFater(this.state.text);
-     CodeMirror.showHint(codeMirror, latex_mode.autocompleter, {prefixMatch:true, caseInsensitiveMatch:false});
    });
-   codeMirror.markText({line: 1, ch: 2}, {line: 3, ch: 4}, {className: 'syntax-error', title: "data.error.message"})
+   codeMirror.on("keyup", (cm, event) => {
+     var pos = cm.getCursor();
+     if (!cm.state.completionActive && pos["ch"] - 1 >= 0 ) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
+        var char = cm.getTokenAt(cm.getCursor())["string"];
+        if (char == "\\" || char == "\(" || char == "\{" || char == "\[") {
+          CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:false, caseInsensitiveMatch:false, completeSingle: false});
+        }
+     }
+   });
   };
   ref = React.createRef();
   render = () => (

@@ -1,0 +1,210 @@
+/**
+    Name: base16-tomorrow-light theme
+    From Atom
+ */
+# 字体，字体大小
+.cm-s-base16-tomorrow-light  {
+  font-family: Consolas, monospace;
+  font-size: 14;
+}
+# 编辑器背景，字体颜色
+.cm-s-base16-tomorrow-light.CodeMirror {
+  background: #ffffff;
+  color: #1d1f21;
+}
+#
+.cm-s-base16-tomorrow-light span.cm-meta {
+  color: #BBB529;
+}
+
+.cm-s-base16-tomorrow-light span.cm-number {
+  color: #6897BB;
+}
+
+.cm-s-base16-tomorrow-light span.cm-keyword {
+  color: #a3685a;
+  line-height: 1em;
+}
+
+.cm-s-base16-tomorrow-light span.cm-def {
+  color: #A9B7C6;
+  font-style: italic;
+}
+
+.cm-s-base16-tomorrow-light span.cm-variable {
+  color: #A9B7C6;
+}
+.cm-s-base16-tomorrow-light span.cm-variable-2 {
+  color: #A9B7C6;
+}
+
+.cm-s-base16-tomorrow-light span.cm-variable-3 {
+  color: #9876AA;
+}
+
+.cm-s-base16-tomorrow-light span.cm-type {
+  color: #AABBCC;
+  font-weight: bold;
+}
+
+.cm-s-base16-tomorrow-light span.cm-property {
+  color: #FFC66D;
+}
+
+.cm-s-base16-tomorrow-light span.cm-operator {
+  color: #A9B7C6;
+}
+
+.cm-s-base16-tomorrow-light span.cm-string {
+  color: #6A8759;
+}
+
+.cm-s-base16-tomorrow-light span.cm-string-2 {
+  color: #6A8759;
+}
+
+.cm-s-base16-tomorrow-light span.cm-comment {
+  color: #61A151;
+  font-style: italic;
+}
+
+.cm-s-base16-tomorrow-light span.cm-link {
+  color: #CC7832;
+}
+
+.cm-s-base16-tomorrow-light span.cm-atom {
+  color: #CC7832;
+}
+
+.cm-s-base16-tomorrow-light span.cm-error {
+  color: #BC3F3C;
+}
+
+.cm-s-base16-tomorrow-light span.cm-tag {
+  color: #629755;
+  font-weight: bold;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.cm-s-base16-tomorrow-light span.cm-attribute {
+  color: #6897bb;
+}
+
+.cm-s-base16-tomorrow-light span.cm-qualifier {
+  color: #6A8759;
+}
+
+.cm-s-base16-tomorrow-light span.cm-bracket {
+  color: #A9B7C6;
+}
+
+.cm-s-base16-tomorrow-light span.cm-builtin {
+  color: #FF9E59;
+}
+
+.cm-s-base16-tomorrow-light span.cm-special {
+  color: #FF9E59;
+}
+
+.cm-s-base16-tomorrow-light span.cm-matchhighlight {
+  color: #FFFFFF;
+  background-color: rgba(50, 89, 48, .7);
+  font-weight: normal;
+}
+
+.cm-s-base16-tomorrow-light span.cm-searching {
+  color: #FFFFFF;
+  background-color: rgba(61, 115, 59, .7);
+  font-weight: normal;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-cursor {
+  border-left: 1px solid #A9B7C6;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-activeline-background {
+  background: #323232;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-gutters {
+  background: #313335;
+  border-right: 1px solid #313335;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-guttermarker {
+  color: #FFEE80;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-guttermarker-subtle {
+  color: #D0D0D0;
+}
+.cm-s-base16-tomorrow-light .CodeMirrir-linenumber {
+  color: #606366;
+}
+
+.cm-s-base16-tomorrow-light .CodeMirror-matchingbracket {
+  background-color: #3B514D;
+  color: #FFEF28 !important;
+  font-weight: bold;
+}
+
+.cm-s-base16-tomorrow-light div.CodeMirror-selected {
+  background: #214283;
+}
+
+.CodeMirror-hints.base16-tomorrow-light {
+  background: #fff;
+  height: auto;
+  width: auto;
+  overflow: scroll;
+  border-radius: 3px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.24);
+  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+.CodeMirror-hints.base16-tomorrow-light .CodeMirror-hint-active {
+  font-weight: 500;
+  color: #d4d4d4;
+  word-wrap: break-word;
+  white-space: normal;
+  box-sizing: border-box;
+  background-color: #494D4E !important;
+}
+
+.CodeMirror-hints {
+  position: absolute;
+  z-index: 10;
+  overflow: hidden;
+  list-style: none;
+
+  margin: 0;
+  padding: 2px;
+
+  -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  border-radius: 3px;
+  border: 1px solid silver;
+
+  background: white;
+  font-size: 90%;
+  font-family: monospace;
+
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.CodeMirror-hint {
+  margin: 0;
+  padding: 0 4px;
+  border-radius: 2px;
+  white-space: pre;
+  color: black;
+  cursor: pointer;
+}
+
+li.CodeMirror-hint-active {
+  background: #08f;
+  color: white;
+}

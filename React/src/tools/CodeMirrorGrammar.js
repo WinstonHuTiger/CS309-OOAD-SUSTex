@@ -556,6 +556,7 @@ function esc_re( s )
 function new_re( re, fl )
 {
     fl = fl || {l:0,x:0,i:0,g:0};
+    console.log(re)
     var re = new RegExp(re, (fl.g?'g':'')+(fl.i?'i':''));
     re.xflags = fl;
     return re;
@@ -690,6 +691,7 @@ function get_re( r, rid, cachedRegexes, boundary )
             else if ('x' === ch.toLowerCase()) xflags.x = 1;
             else if ('l' === ch.toLowerCase()) xflags.l = 1;
         }
+        console.log(regexSource)
         regexBody = regexSource.substring(1, i);
         if ( '^' === regexBody.charAt(0) )
         {
@@ -4925,7 +4927,7 @@ var Matcher = {
 // codemirror supposed to be available
 var $CodeMirror$ = 'undefined' !== typeof CodeMirror ? CodeMirror : { Pass : { toString: function(){return "CodeMirror.Pass";} } },
     // used for autocompletion
-    RE_W = /[\w$]/, by_score = function( a, b ) { return b.score-a.score }
+    RE_W = /[\\\w$]/, by_score = function( a, b ) { return b.score-a.score }
 ;
 
 //
