@@ -9,11 +9,17 @@ import 'codemirror/addon/fold/foldgutter.js';
 import 'codemirror/addon/fold/foldgutter.css';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
+import { Resizable } from "re-resizable";
 
 var codeMirror;
 // 1. a partial latex grammar in simple JSON format
 // 1. an almost complete python grammar in simple JSON format
-
+const resizable_style = {
+  position: "relative",
+  float: "left",
+  width: "50%",
+  height: "100%"
+};
 class LatexEditor extends Component {
   constructor(props) {
     super(props);
@@ -91,7 +97,41 @@ class LatexEditor extends Component {
   };
   ref = React.createRef();
   render = () => (
+    <Resizable
+      style={resizable_style}
+      defaultSize={{
+        width: "50%",
+        height: "100%"
+      }}
+      enable={{
+        top:false,
+        right:true,
+        bottom:false,
+        left:false,
+        topRight:false,
+        bottomRight:false,
+        bottomLeft:false,
+        topLeft:false
+      }}
+      minWidth="25%"
+      maxWidth="75%"
+      handleStyles={{
+        right: {
+            marginLeft: -7,
+            left: "100%",
+            cursor: "ew-resize",
+            borderTop: "none",
+            borderLeft: "none",
+            borderBottom: "none",
+            borderWidth: 5,
+            borderColor: "@almost-white",
+            width: 10,
+            boxShadow: "3px 0px 6px #e7e7e7",
+          },
+      }}
+    >
     <div ref={self => this.editor = self} />
+  </Resizable>
   );
 }
 
