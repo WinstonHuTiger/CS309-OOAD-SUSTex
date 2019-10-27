@@ -556,7 +556,6 @@ function esc_re( s )
 function new_re( re, fl )
 {
     fl = fl || {l:0,x:0,i:0,g:0};
-    console.log(re)
     var re = new RegExp(re, (fl.g?'g':'')+(fl.i?'i':''));
     re.xflags = fl;
     return re;
@@ -691,7 +690,6 @@ function get_re( r, rid, cachedRegexes, boundary )
             else if ('x' === ch.toLowerCase()) xflags.x = 1;
             else if ('l' === ch.toLowerCase()) xflags.l = 1;
         }
-        console.log(regexSource)
         regexBody = regexSource.substring(1, i);
         if ( '^' === regexBody.charAt(0) )
         {
@@ -708,6 +706,7 @@ function get_re( r, rid, cachedRegexes, boundary )
 
         if ( !cachedRegexes[ regexID ] )
         {
+            console.log("REGEX" + regex)
             regex = new_re( regex, xflags );
             // shared, light-weight
             cachedRegexes[ regexID ] = regex;

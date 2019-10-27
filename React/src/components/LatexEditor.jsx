@@ -6,6 +6,7 @@ import 'codemirror/addon/lint/lint.js';
 import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
+import 'codemirror/addon/fold/foldgutter.css';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
 
@@ -64,7 +65,7 @@ class LatexEditor extends Component {
         mode: "latex",
         lineNumbers: true,
         indentUnit: 4,
-        indentWithTabs: false,
+        indentWithTabs: true,
         lint: true,  // enable lint validation
         matching: true,  // enable token matching, e.g braces, tags etc..
         extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment", "Ctrl" : () => { console.log(CodeMirror.Pos(1, 2));}},

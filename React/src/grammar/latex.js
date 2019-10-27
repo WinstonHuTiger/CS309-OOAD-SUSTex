@@ -5,7 +5,7 @@ const latex_grammar = {
 
 "Extra"                     : {
 
-    "fold"                  : "indent"
+    "fold"                  : "\\begin,\\end"
 },
 
 // Style model
@@ -25,12 +25,23 @@ const latex_grammar = {
     ,"any"                  : "any"
     ,"str"                  : "str"
     ,"math"                 : "math"
-    ,"test"                 : "test"
+    ,"custom_slash"         : "keyword"
+    ,"ch"                   : "ch"
+    ,"begin_end"            : "keyword"
+    ,"number"               : "number"
+    ,"other_math"           : "math"
+    ,"dolor"                : "math"
+    ,"space"                : "space"
+    ,"comment"              : "comment"
+    ,"lb_error"             : "error"
+    ,"lc_error"             : "error"
+    ,"lp_error"             : "error"
+
 },
 
 // Lexical model
 "Lex"                       : {
-    "def"                   : {"autocomplete":true,"tokens":[
+    "description"           : {"autocomplete":true,"tokens":[
                             "math", "displaymath", "toc", "section", "name",
                             "text", "amount", "author", "begin",
                             "length", "counter", "names", "environment",
@@ -47,9 +58,6 @@ const latex_grammar = {
                             "obj", "def", "envname", "cs", "sty", "modulus",
                             "positions", "stuff", "width", "height", "cc",
                             "footnote"
-                            ]}
-    ,"sequence"             : {"autocomplete":true,"tokens":[
-                            "n", "size", "pos", "narg", "sectyp", "toctitle"
                             ]}
     ,"keyword"              : {"autocomplete":true,"tokens":[
                             "\\addcontentsline", "\\address", "\\addtocontents",
@@ -129,8 +137,7 @@ const latex_grammar = {
                             "\\verb*", "\\vfill", "\\vspace", "\\vspace*",
                             "\\year", "\\unboldmath", "\\fboxsep"
                             ]}
-    ,"custom"               : "RE::/\\[0-9a-zA-Z]+/"
-    ,"char"                 : "RE::/\\\\[!#$%&'()*+,-./:;<=>@\[\\\]^_{|}~ b]/"
+    ,"char"                 : "RE::/\\\\([!#$%&'()*+,-.\\/:;<=>@[\\]\^_{\\|}~ b]|(\\\\))/"
     ,"symbol"               : {"autocomplete":false,"tokens":[
                             "\\aa", "\\acute", "\\ae", "\\aleph", "\\alph",
                             "\\alpha", "\\amalg", "\\angle", "\\approx",
@@ -206,16 +213,16 @@ const latex_grammar = {
                             "\\wedge", "\\widehat", "\\widetilde", "\\wp",
                             "\\wr", "\\xi", "\\Xi", "\\zeta"
                             ]}
-    ,"unknown"              : "RE::/[^\\\\)}\\]]*/"
+    ,"unknown"              : "RE::/[^\\(){}[\\],\\n]+/"
     ,"lb"                   : "["
     ,"rb"                   : "]"
     ,"lc"                   : "("
     ,"rc"                   : ")"
     ,"lp"                   : "{"
     ,"rp"                   : "}"
-    ,"any"                  : "RE::/[^\\n]*/"
-    ,"math"                 : "RE::/[$].*[$]/"
-    ,"description"          : "RE::/(math|displaymath|toc|section|name|text" +
+    ,"any"                  : "RE::/[^\\\\)}\\],{$\\n]+/"
+    ,"dolor"                : "RE::/[$]/"
+    ,"def"                  : "RE::/(math|displaymath|toc|section|name|text" +
                               "|amount|author|begin|length|counter|names" +
                               "|environment|abstract|array|lrc|center|description" +
                               "|document|enumerate|eqnarray|eqnarray*|equation" +
@@ -229,20 +236,44 @@ const latex_grammar = {
                               "|cc|footnote|article|fancyhdr|extramarks|amsmath" +
                               "|amsthm|amsfonts|tikz|algorithm|algpseudocode" +
                               "|tikzpicture)(?=[)}\\]])/"
+    ,"custom_slash"           : "RE::/\\\\[0-9a-zA-Z]+/"
+    ,"custom_word"            : "RE::/[0-9a-zA-Z]+/"
+    ,"ch"                     : "RE::/[,.;]/"
+    ,"begin_end"              : {"autocomplete":false,"tokens":["\\begin", "\\end", "\\usepackage"]}
+    ,"number"                 : "RE::/[0-9]+\\.?[0-9]*/"
+    ,"other_math"             : "RE::/[^$\\n]+/"
+    ,"empty"                  : "RE::/[\\r\\n\\t ]/"
+    ,"comment"                : "RE::/%.*/"
+    ,"lb_error"               : "RE::/[()[{}]/"
+    ,"lc_error"               : "RE::/[([{}\\]]/"
+    ,"lp_error"               : "RE::/[()[{\\]]/"
 },
 
 // Syntax model (optional)
 "Syntax"                    : {
 
-    "brackets"                 : "(lb def rb) | (lc def rc) | (lp def rp)",
-    "latex"                    : "lb | math | keyword | char_str | description",
-    "char_str"                 : "char latex",
+    "str"                      : "(comment str) | (symbol str) | (math str) |" +
+                                 "(ch str) | (struct str) |" +
+                                 "(custom_slash str) | (brackets str) |" +
+                                 "(description str) | (number str) | (any str) | " +
+                                 "(char str) | ''",
+    "math_content"             : "(symbol math_content) | (other_math math_content) | ''",
+    "math"                     : "dolor math_content dolor",
+    "des_str"                  : "(ch des_str) | (custom_slash des_str) | " +
+                                 "(description des_str) | (unknown des_str) | ''",
+    "struct_brackets"          : "(lb des_str rb) struct_brackets | " +
+                                 "(lc des_str rc) struct_brackets | " +
+                                 "(lp des_str rp) struct_brackets | str",
+    "struct"                   : "begin_end struct_brackets",
+    "brackets"                 : "(lb str rb) | (lc str rc) | (lp str rp)",
+    "latex"                    : "comment | math | struct | keyword | custom_slash | brackets | str",
+    "test"                     : "str | char"
 
 },
 
 // what to parse and in what order
 // an array i.e ["py"], instead of single token i.e "py", is a shorthand for an "ngram"-type syntax token (for parser use)
-"Parser"                    : [ ["latex"] ]
+"Parser"                    : [ ["str"] ]
 
 };
 global.constants = {
