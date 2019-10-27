@@ -11,12 +11,10 @@ const latex_grammar = {
 // Style model
 "Style"                     : {
 
-    "char"                 : "char"
+     "char"                 : "char"
     ,"symbol"               : "symbol"
     ,"description"          : "description"
     ,"keyword"              : "keyword"
-    ,"latex"                : "latex"
-    ,"test"                 : "test"
     ,"lb"                   : "lb"
     ,"rb"                   : "rb"
     ,"lc"                   : "lc"
@@ -24,11 +22,15 @@ const latex_grammar = {
     ,"lp"                   : "lp"
     ,"rp"                   : "rp"
     ,"unknown"              : "unknown"
+    ,"any"                  : "any"
+    ,"str"                  : "str"
+    ,"math"                 : "math"
+    ,"test"                 : "test"
 },
 
 // Lexical model
 "Lex"                       : {
-    "description"           : {"autocomplete":true,"tokens":[
+    "def"                   : {"autocomplete":true,"tokens":[
                             "math", "displaymath", "toc", "section", "name",
                             "text", "amount", "author", "begin",
                             "length", "counter", "names", "environment",
@@ -114,6 +116,7 @@ const latex_grammar = {
                             "\\smallskipamount", "\\stackrel", "\\stop",
                             "\\subparagraph", "\\subparagraph*", "\\subsection",
                             "\\subsubsection", "\\subsection*", "\\symbol",
+                            "\\subsubsection*",
                             "\\tabbingsep", "\\tabcolsep", "\\tableofcontents",
                             "\\textfloatsep", "\\textfraction", "\\textheight",
                             "\\textstyle", "\\textwidth", "\\thanks",
@@ -124,17 +127,11 @@ const latex_grammar = {
                             "\\unboldmat", "\\unitlength", "\\usebox",
                             "\\usecounter", "\\value", "\\vector", "\\verb",
                             "\\verb*", "\\vfill", "\\vspace", "\\vspace*",
-                            "\\year"
+                            "\\year", "\\unboldmath", "\\fboxsep"
                             ]}
-    ,"char"                 : {"autocomplete":false,"tokens":[
-                            "\\!", "\\\"", "\\#", "\\$", "\\%", "\\&", "\\\'",
-                            "\\(", "\\)", "\\*", "\\+", "\\,", "\\-", "\\.",
-                            "\\/", "\\:", "\\;", "\\<", "\\=", "\\>", "\\@",
-                            "\\[", "\\\\", "\\\\*", "\\]", "\\^", "\_", "\\\'",
-                            "\\{", "\\|", "\\}", "\\~", "\\a\'", "\\a=", "\\ ",
-                            "\\b", "\\nl", "\\c"
-                            ]}
-    ,"symbol"               : {"autocomplete":true,"tokens":[
+    ,"custom"               : "RE::/\\[0-9a-zA-Z]+/"
+    ,"char"                 : "RE::/\\\\[!#$%&'()*+,-./:;<=>@\[\\\]^_{|}~ b]/"
+    ,"symbol"               : {"autocomplete":false,"tokens":[
                             "\\aa", "\\acute", "\\ae", "\\aleph", "\\alph",
                             "\\alpha", "\\amalg", "\\angle", "\\approx",
                             "\\arccos", "\\arcsin", "\\arctan", "\\arg",
@@ -209,29 +206,43 @@ const latex_grammar = {
                             "\\wedge", "\\widehat", "\\widetilde", "\\wp",
                             "\\wr", "\\xi", "\\Xi", "\\zeta"
                             ]}
-    ,"unknown"              : "RE::/[^)}\\]]+/"
+    ,"unknown"              : "RE::/[^\\\\)}\\]]*/"
     ,"lb"                   : "["
     ,"rb"                   : "]"
     ,"lc"                   : "("
     ,"rc"                   : ")"
     ,"lp"                   : "{"
     ,"rp"                   : "}"
-    ,"any"                  : "RE::/./"
+    ,"any"                  : "RE::/[^\\n]*/"
+    ,"math"                 : "RE::/[$].*[$]/"
+    ,"description"          : "RE::/(math|displaymath|toc|section|name|text" +
+                              "|amount|author|begin|length|counter|names" +
+                              "|environment|abstract|array|lrc|center|description" +
+                              "|document|enumerate|eqnarray|eqnarray*|equation" +
+                              "|figure|figure*|flushleft|flushright|itemize" +
+                              "|list|labeling|spacing|minipage|picture|vsize" +
+                              "|quotation|quote|tabbing|table|table*|tabular" +
+                              "|arg|theorem|titlepage|verbatim|verse|dwid" +
+                              "|numerator|denominator|len|filename|ref|file" +
+                              "|formula|dimen|lhd|rhd|noc|fmt|obj|def|envname" +
+                              "|cs|sty|modulus|positions|stuff|width|height" +
+                              "|cc|footnote|article|fancyhdr|extramarks|amsmath" +
+                              "|amsthm|amsfonts|tikz|algorithm|algpseudocode" +
+                              "|tikzpicture)(?=[)}\\]])/"
 },
 
 // Syntax model (optional)
 "Syntax"                    : {
 
-    "word"                     : "description | unknown",
-    "brackets"                 : "(lp word rp | lb word rb | lc word rc |) | any",
-    "gra"                      : "keyword brackets brackets brackets",
-    "latex"                    : "char | symbol | gra",
+    "brackets"                 : "(lb def rb) | (lc def rc) | (lp def rp)",
+    "latex"                    : "lb | math | keyword | char_str | description",
+    "char_str"                 : "char latex",
 
 },
 
 // what to parse and in what order
 // an array i.e ["py"], instead of single token i.e "py", is a shorthand for an "ngram"-type syntax token (for parser use)
-"Parser"                    : [ ["gra"] ]
+"Parser"                    : [ ["latex"] ]
 
 };
 global.constants = {

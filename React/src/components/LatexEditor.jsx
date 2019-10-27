@@ -7,7 +7,7 @@ import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
 import '../grammar/latex.js';
-import './editor-theme/base16-tomorrow-light.css';
+import './editor-theme/base16-tomorrow-light.less';
 
 var codeMirror;
 // 1. a partial latex grammar in simple JSON format
