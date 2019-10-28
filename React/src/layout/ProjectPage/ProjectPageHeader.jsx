@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Row, Col, Button, Icon } from 'antd';
-import './css/custom.css';
+import '../css/custom.css';
 
 const headerStyle = {
   height: '64px',

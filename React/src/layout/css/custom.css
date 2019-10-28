@@ -19,21 +19,33 @@
 
 .content-row {
   background: #FFF;
+  height: 100%;
 }
 
 
 .markdown-body {
-  overflow: auto;
   height: calc(100vh - 64px);
-  padding: 40px 45px 40px 20px;
-}
-
-.markdown {
-  padding: 40px 45px 40px 20px;
 }
 
 .menu {
   margin-top: 64px;
   height: calc(100vh - 64px);
   background: #FFF;
+}
+
+.hideIcon {
+  padding: 40px;
+  border-radius: 10px;
+  border: 1.5px solid #dddddd;
+  transition: all 300ms ease-out;
+}
+
+.hover {
+  box-shadow: 0 0 6px rgba(35, 173, 278, 1);
+}
+
+.blur {
+  box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5);
+  filter: blur(10px);
+  transition: all 0.3s ease-out;
 }

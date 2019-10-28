@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Layout, Menu, Button, Popover, Icon, Input } from 'antd';
 import Lightbox from 'react-lightbox-component';
-import './css/lightbox.css';
-import './css/custom.css';
+import '../css/lightbox.css';
+import '../css/custom.css';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;

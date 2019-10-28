@@ -14,6 +14,11 @@ import { Resizable } from "re-resizable";
 var codeMirror;
 // 1. a partial latex grammar in simple JSON format
 // 1. an almost complete python grammar in simple JSON format
+const blur = {
+  boxShadow: "inset 0 0 2000px rgba(255, 255, 255, .5)",
+  filter: "blur(10px)",
+  transition: "all 0.3s ease-out"
+};
 const resizable_style = {
   position: "relative",
   float: "left",
@@ -24,7 +29,8 @@ class LatexEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: this.props.text
+      text: this.props.text,
+      id: this.props.id
     };
   }
   componentDidMount = () => {
@@ -98,7 +104,11 @@ class LatexEditor extends Component {
   };
   ref = React.createRef();
   render = () => (
-    <div ref={self => this.editor = self} />
+    <div
+      ref={self => this.editor = self}
+      id={this.state.id}
+      style={this.props.blur?blur:null}
+       />
   );
 }
 

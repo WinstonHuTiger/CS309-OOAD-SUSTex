@@ -9,11 +9,17 @@ import 'codemirror/addon/hint/show-hint.css';
 import javascriptHint from 'codemirror/addon/hint/javascript-hint.js'
 
 var codeMirror;
+const blur = {
+  boxShadow: "inset 0 0 2000px rgba(255, 255, 255, .5)",
+  filter: "blur(10px)",
+  transition: "all 0.3s ease-out"
+};
 class MarkdownEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: this.props.text
+      text: this.props.text,
+      id: this.props.id
     };
   }
   componentDidMount = () => {
@@ -35,7 +41,11 @@ class MarkdownEditor extends Component {
   };
   ref = React.createRef();
   render = () => (
-    <div ref={self => this.editor = self} />
+    <div
+      ref={self => this.editor = self}
+      id={this.state.id}
+      style={this.props.blur?blur:null}
+       />
   );
 }
 

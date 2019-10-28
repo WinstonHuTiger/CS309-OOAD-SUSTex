@@ -1,14 +1,10 @@
 import React from 'react';
 import { Layout, Menu, Breadcrumb, Icon, Button, Row, Col, Input, Popover } from 'antd';
-import 'github-markdown-css/github-markdown.css';
-import Scrollbars from 'react-custom-scrollbars';
 import NProgress from '../tools/nprogress';
-import ProjectPageHeader from './ProjectPageHeader';
-import ProjectPageFileManagement from './ProjectPageFileManagement';
-import ProjectPageMainContent from './ProjectPageMainContent';
-import MarkdownRender from '../components/MarkdownRender';
-import MarkdownEditor from '../components/MarkdownEditor';
-import LatexEditor from '../components/LatexEditor';
+import ProjectPageHeader from './ProjectPage/ProjectPageHeader';
+import ProjectPageFileManagement from './ProjectPage/ProjectPageFileManagement';
+import ProjectPageMainContent from './ProjectPage/ProjectPageMainContent';
+
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
