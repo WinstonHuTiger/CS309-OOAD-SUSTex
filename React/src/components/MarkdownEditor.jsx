@@ -6,7 +6,8 @@ import 'codemirror/mode/markdown/markdown';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/hint/show-hint.js';
 import 'codemirror/addon/hint/show-hint.css';
-import javascriptHint from 'codemirror/addon/hint/javascript-hint.js';
+import javascriptHint from 'codemirror/addon/hint/javascript-hint.js'
+
 var codeMirror;
 class MarkdownEditor extends Component {
   constructor(props) {

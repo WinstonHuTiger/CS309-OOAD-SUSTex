@@ -77,7 +77,8 @@ class LatexEditor extends Component {
         extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment", "Ctrl" : () => { console.log(CodeMirror.Pos(1, 2));}},
         foldGutter: true,
         theme: "base16-tomorrow-light",
-        gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+        gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+        value: this.state.text
     });
    codeMirror.on('change',() => {
      this.setState({
@@ -97,41 +98,7 @@ class LatexEditor extends Component {
   };
   ref = React.createRef();
   render = () => (
-    <Resizable
-      style={resizable_style}
-      defaultSize={{
-        width: "50%",
-        height: "100%"
-      }}
-      enable={{
-        top:false,
-        right:true,
-        bottom:false,
-        left:false,
-        topRight:false,
-        bottomRight:false,
-        bottomLeft:false,
-        topLeft:false
-      }}
-      minWidth="25%"
-      maxWidth="75%"
-      handleStyles={{
-        right: {
-            marginLeft: -7,
-            left: "100%",
-            cursor: "ew-resize",
-            borderTop: "none",
-            borderLeft: "none",
-            borderBottom: "none",
-            borderWidth: 5,
-            borderColor: "@almost-white",
-            width: 10,
-            boxShadow: "3px 0px 6px #e7e7e7",
-          },
-      }}
-    >
     <div ref={self => this.editor = self} />
-  </Resizable>
   );
 }
 

@@ -1,0 +1,39 @@
+#trigger:hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.collapsed {
+  left: -7px;
+}
+
+.uncollapsed {
+  left: 198px;
+}
+
+@media (max-width: 767px) {
+  .markdown-body {
+  	padding: 5px;
+  }
+}
+
+.content-row {
+  background: #FFF;
+}
+
+
+.markdown-body {
+  overflow: auto;
+  height: calc(100vh - 64px);
+  padding: 40px 45px 40px 20px;
+}
+
+.markdown {
+  padding: 40px 45px 40px 20px;
+}
+
+.menu {
+  margin-top: 64px;
+  height: calc(100vh - 64px);
+  background: #FFF;
+}
