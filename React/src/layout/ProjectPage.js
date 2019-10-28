@@ -8,13 +8,36 @@ import Lightbox from 'react-lightbox-component';
 import './lightbox.css';
 import MarkdownEditor from '../components/MarkdownEditor';
 import LatexEditor from '../components/LatexEditor';
+import NProgress from '../tools/nprogress';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 const { Search } = Input;
 const ReactMarkdown = require('react-markdown');
 
+var startTime;
 class ProjectPage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillMount() {
+    startTime = new Date();
+    NProgress.start();
+  }
+
+  componentDidMount() {
+    let endTime = new Date();
+    let timeInterval = endTime.getTime() - startTime.getTime();
+    if (timeInterval <= 500){
+      setTimeout(function(){
+        NProgress.done();
+      }, 500 - timeInterval);
+    } else {
+      NProgress.done();
+    }
+  }
+
   state = {
     mode: "latex",
     isLoading: true,
