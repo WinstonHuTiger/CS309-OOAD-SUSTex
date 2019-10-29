@@ -19,13 +19,11 @@ function MarkdownRender(props) {
   const triggerStyle = {
     position: 'absolute',
     top: '50%',
-    right: 0,
     zIndex: '999',
     background: '#FFF',
     width: '20px',
     height: '50px',
     borderRadius: '  0 100% 100% 0/50%  ',
-    opacity: '0.5',
     transform: 'rotate(180deg)'
     // borderRight: '0px',
   };
@@ -33,6 +31,7 @@ function MarkdownRender(props) {
       <>
         <Button
           id="trigger"
+          className={props.showButton?"right-show":"right-hide"}
           style={props.hide?triggerStyle:({ display: "none" })}
           icon="right"
           shape="circle"

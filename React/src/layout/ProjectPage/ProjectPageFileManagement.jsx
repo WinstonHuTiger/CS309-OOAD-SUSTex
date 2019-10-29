@@ -16,8 +16,8 @@ const triggerStyle = {
   width: '20px',
   height: '50px',
   borderRadius: '0  100% 100% 0/ 50%',
-  opacity: '0.5',
   borderLeft: '0px',
+  transition: "all 0.25s ease-out",
 };
 
 const only_me = (
@@ -48,12 +48,12 @@ const star_ocean = (
 class FileManagement extends Component {
   constructor(props) {
     super(props);
-    console.log(props)
     this.state = {
       isLoading: true,
       collapsed: true,
       modalIsOpen: true,
-      changeMode: this.props.changeMode
+      changeMode: this.props.changeMode,
+      leftShow: false
     }
   }
 
@@ -75,6 +75,20 @@ class FileManagement extends Component {
     this.state.changeMode("markdown")
   }
 
+  componentDidMount() {  
+    document.body.onmousemove = (e) => {
+      if (e.clientX > 50 && this.state.leftShow) {
+        this.setState({
+          leftShow: false
+        });
+      } else if (e.clientX <= 50 && !this.state.leftShow) {
+        this.setState({
+          leftShow: true
+        });
+      }
+    }
+  }
+
   render(){
       return(
         <Sider collapsible
@@ -89,9 +103,12 @@ class FileManagement extends Component {
           defaultSelectedKeys={['/markdown.md']}
           className="menu">
             <Button
-              id="trigger"
               style={triggerStyle}
-              className={this.state.collapsed?"collapsed":"uncollapsed"}
+              className={
+                this.state.collapsed?
+                (this.state.leftShow?"left-show":"left-hide"):
+                ("uncollapsed")
+              }
               icon={this.state.collapsed?"right":"left"}
               shape="circle"
               onClick={this.toggle}/>

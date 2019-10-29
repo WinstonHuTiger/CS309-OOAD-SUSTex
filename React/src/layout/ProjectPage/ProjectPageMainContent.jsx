@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import { Row, Col, Layout, Button } from 'antd';
+import { Row, Col, Layout } from 'antd';
 import MarkdownRender from '../../components/MarkdownRender';
 import MarkdownEditor from '../../components/MarkdownEditor';
 import LatexEditor from '../../components/LatexEditor';
 import { Resizable } from "re-resizable";
 import '../css/custom.css';
-
 const { Content } = Layout;
 const contentStyle = {
   paddingTop: '64px',
@@ -53,7 +52,8 @@ class MainContent extends Component {
       defaultSize: {
         width: "50%",
         height: "100%"
-      }
+      },
+      showRightButton: false
     }
   }
 
@@ -73,7 +73,8 @@ class MainContent extends Component {
         height: "100%"
       },
       hide: false
-    })
+    });
+    document.getElementById("editor").onmousemove = null;
   }
 
   render() {
@@ -129,7 +130,6 @@ class MainContent extends Component {
                       resizeSize: null
                     })
                   }
-                  console.log(this.state.hide);
                   if(this.state.hide)
                     return;
                   let width = refToElement.style.width;
@@ -175,6 +175,17 @@ class MainContent extends Component {
                         hideRender: true,
                         hide: true
                       });
+                      document.getElementById("editor").onmousemove = (e) => {
+                        if (document.body.offsetWidth - e.clientX <= 50 && !this.state.showRightButton) {
+                          this.setState({
+                            showRightButton: true
+                          });
+                        } else if (document.body.offsetWidth - e.clientX > 50 && this.state.showRightButton) {
+                          this.setState({
+                            showRightButton: false
+                          });
+                        }
+                      }
                     } else {
                       this.setState({
                         resizeSize: {
@@ -250,6 +261,7 @@ class MainContent extends Component {
                    source={this.state.value}
                    hide={this.state.hideRender}
                    show={this.showRender}
+                   showButton={this.state.showRightButton}
                  />
           </Col>
         </Row>

@@ -1,14 +1,10 @@
-#trigger:hover {
-  visibility: visible;
-  opacity: 1;
-}
-
-.collapsed {
-  left: -7px;
-}
-
 .uncollapsed {
-  left: 198px;
+  left: 199px;
+  opacity: 0.4;
+}
+
+.uncollapsed:hover {
+  opacity: 1;
 }
 
 @media (max-width: 767px) {
@@ -48,4 +44,28 @@
   box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5);
   filter: blur(10px);
   transition: all 0.3s ease-out;
+}
+
+body {
+  margin-left: 1px;
+}
+
+html {
+  overflow-y: hidden;
+}
+
+.left-hide {
+  left: -40px;
+}
+
+.left-show {
+  left: -5px;
+}
+
+.right-hide {
+  right: -40px;
+}
+
+.right-show {
+  right: -5px;
 }
