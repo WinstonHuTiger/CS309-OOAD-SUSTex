@@ -3978,7 +3978,7 @@ function count_column( string, end, tabSize, startIndex, startValue )
     }
 }
 
-var Typo = require("typo-js");
+const Typo = require("typo-js");
 var aff_loading = false;
 var dic_loading = false;
 var num_loaded = 0;

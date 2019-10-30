@@ -10,7 +10,6 @@ import 'codemirror/addon/fold/foldgutter.css';
 import 'codemirror/addon/mode/overlay.js';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
-import { Resizable } from 're-resizable';
 import CodeMirrorSpellChecker from 'codemirror-spell-checker';
 
 var codeMirror;
@@ -20,12 +19,6 @@ const blur = {
   boxShadow: "inset 0 0 2000px rgba(255, 255, 255, .5)",
   filter: "blur(10px)",
   transition: "all 0.3s ease-out"
-};
-const resizable_style = {
-  position: "relative",
-  float: "left",
-  width: "50%",
-  height: "100%"
 };
 class LatexEditor extends Component {
   constructor(props) {
@@ -46,7 +39,7 @@ class LatexEditor extends Component {
     latex_mode.supportCodeMatching = true;
     latex_mode.matcher.options = {maxHighlightLineLength:1000}; // default
     CodeMirror.defineOption("matching", false, function( cm, val, old ) {
-        if ( old && old != CodeMirror.Init )
+        if ( old && old !== CodeMirror.Init )
         {
             cm.off( "cursorActivity", latex_mode.matcher );
             latex_mode.matcher.clear( cm );
@@ -95,7 +88,7 @@ class LatexEditor extends Component {
      var pos = cm.getCursor();
      if (!cm.state.completionActive && pos["ch"] - 1 >= 0 ) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
         var char = cm.getTokenAt(cm.getCursor())["string"];
-        if (char == "\\" || char == "\(" || char == "\{" || char == "\[") {
+        if (char === "\\" || char === "(" || char === "{" || char === "[") {
           CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:false, caseInsensitiveMatch:false, completeSingle: false});
         }
      }

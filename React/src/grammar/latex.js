@@ -138,7 +138,7 @@ const latex_grammar = {
                             "\\verb*", "\\vfill", "\\vspace", "\\vspace*",
                             "\\year", "\\unboldmath", "\\fboxsep"
                             ]}
-    ,"char"                 : "RE::/\\\\([!#$%&'()*+,-.\\/:;<=>@[\\]\^_{\\|}~ b]|(\\\\))/"
+    ,"char"                 : "RE::/\\\\([!#$%&'()*+,-.\\/:;<=>@[\\]\\^_{\\|}~ b]|(\\\\))/"
     ,"symbol"               : {"autocomplete":false,"tokens":[
                             "\\aa", "\\acute", "\\ae", "\\aleph", "\\alph",
                             "\\alpha", "\\amalg", "\\angle", "\\approx",

@@ -23,17 +23,12 @@ const githubButtonStyle = {
 };
 
 class Header extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   render = () => (
     <header style={headerStyle}>
       <Row>
         <Col span={6}>
-          <a href="#">
-            <h2 style={logoStyle}>SUSTex</h2>
-          </a>
+          <h2 style={logoStyle}>SUSTex</h2>
         </Col>
         <Col span={4} push={15}>
           <Button style={githubButtonStyle}>

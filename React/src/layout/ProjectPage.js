@@ -1,21 +1,9 @@
 import React from 'react';
-import { Layout, Menu, Breadcrumb, Icon, Row, Col, Input, Popover } from 'antd';
+import { Layout } from 'antd';
 import NProgress from '../tools/nprogress';
 import ProjectPageHeader from './ProjectPage/ProjectPageHeader';
 import ProjectPageFileManagement from './ProjectPage/ProjectPageFileManagement';
 import ProjectPageMainContent from './ProjectPage/ProjectPageMainContent';
-
-
-const { Header, Content, Footer, Sider } = Layout;
-const { SubMenu } = Menu;
-const { Search } = Input;
-const ReactMarkdown = require('react-markdown');
-
-const contentStyle = {
-  paddingTop: '64px',
-  height: '100%',
-  width: '100%'
-};
 
 var startTime;
 class ProjectPage extends React.Component {

@@ -243,7 +243,7 @@
       spinner && removeElement(spinner);
     }
 
-    if (parent != document.body) {
+    if (parent !== document.body) {
       addClass(parent, 'nprogress-custom-parent');
     }
 
@@ -353,7 +353,7 @@
 
     return function(fn) {
       pending.push(fn);
-      if (pending.length == 1) next();
+      if (pending.length === 1) next();
     };
   })();
 
@@ -405,7 +405,7 @@
           prop,
           value;
 
-      if (args.length == 2) {
+      if (args.length === 2) {
         for (prop in properties) {
           value = properties[prop];
           if (value !== undefined && properties.hasOwnProperty(prop)) applyCss(element, prop, value);
@@ -421,7 +421,7 @@
    */
 
   function hasClass(element, name) {
-    var list = typeof element == 'string' ? element : classList(element);
+    var list = typeof element === 'string' ? element : classList(element);
     return list.indexOf(' ' + name + ' ') >= 0;
   }
 
@@ -463,7 +463,7 @@
    */
 
   function classList(element) {
-    return (' ' + (element && element.className || '') + ' ').replace(/\s+/gi, ' ');
+    return (' ' + ((element && element.className) || '') + ' ').replace(/\s+/gi, ' ');
   }
 
   /**

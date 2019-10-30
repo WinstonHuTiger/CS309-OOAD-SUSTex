@@ -8,7 +8,6 @@ function MarkdownRender(props) {
   mk = require('markdown-it-katex');
   md.use(mk);
   let result = md.render(props['source']);
-  let collapsed = "collapsed";
   let style = {
     position: "absoulte",
     right: 0,

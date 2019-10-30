@@ -4,7 +4,7 @@ import Lightbox from 'react-lightbox-component';
 import '../css/lightbox.css';
 import '../css/custom.css';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Sider } = Layout;
 const { SubMenu } = Menu;
 const { Search } = Input;
 

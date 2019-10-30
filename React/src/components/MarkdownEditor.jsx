@@ -28,7 +28,6 @@ class MarkdownEditor extends Component {
      lineNumbers: true,
      indentWithTabs: true,
      lineWrapping: true,
-     indentWithTabs: true,
      value: this.state.text
    });
    CodeMirror.registerHelper("hint","javascript", javascriptHint);

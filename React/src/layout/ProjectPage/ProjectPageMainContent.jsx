@@ -219,7 +219,7 @@ class MainContent extends Component {
                     Hide
                   </div>
                  </div>):(null)}
-                {this.props.mode == "markdown" ? (
+                {this.props.mode === "markdown" ? (
                   <MarkdownEditor
                     updateFater={this.getEditorText}
                     blur={this.state.min}
