@@ -36,6 +36,7 @@ const latex_grammar = {
     ,"lb_error"             : "error"
     ,"lc_error"             : "error"
     ,"lp_error"             : "error"
+    ,"text"                 : "text"
 
 },
 
@@ -221,6 +222,7 @@ const latex_grammar = {
     ,"lp"                   : "{"
     ,"rp"                   : "}"
     ,"any"                  : "RE::/[^\\\\)}\\],{$\\n]+/"
+    ,"text"                 : "RE::/[a-zA-Z]+/"
     ,"dolor"                : "RE::/[$]/"
     ,"def"                  : "RE::/(math|displaymath|toc|section|name|text" +
                               "|amount|author|begin|length|counter|names" +
@@ -252,10 +254,15 @@ const latex_grammar = {
 // Syntax model (optional)
 "Syntax"                    : {
 
+    "str_b"                    : "(comment str_b) | (symbol str_b) | (math str_b) |" +
+                                 "(ch str_b) | (struct str_b) |" +
+                                 "(custom_slash str_b) | (brackets str_b) |" +
+                                 "(description str_b) | (number str_b) | (any str_b) | " +
+                                 "(char str_b) | ''",
     "str"                      : "(comment str) | (symbol str) | (math str) |" +
                                  "(ch str) | (struct str) |" +
                                  "(custom_slash str) | (brackets str) |" +
-                                 "(description str) | (number str) | (any str) | " +
+                                 "(text str) | (number str) | (any str) | " +
                                  "(char str) | ''",
     "math_content"             : "(symbol math_content) | (other_math math_content) | ''",
     "math"                     : "dolor math_content dolor",
@@ -265,7 +272,7 @@ const latex_grammar = {
                                  "(lc des_str rc) struct_brackets | " +
                                  "(lp des_str rp) struct_brackets | str",
     "struct"                   : "begin_end struct_brackets",
-    "brackets"                 : "(lb str rb) | (lc str rc) | (lp str rp)",
+    "brackets"                 : "(lb str_b rb) | (lc str_b rc) | (lp str_b rp)",
     "latex"                    : "comment | math | struct | keyword | custom_slash | brackets | str",
     "test"                     : "str | char"
 
@@ -273,7 +280,7 @@ const latex_grammar = {
 
 // what to parse and in what order
 // an array i.e ["py"], instead of single token i.e "py", is a shorthand for an "ngram"-type syntax token (for parser use)
-"Parser"                    : [ ["str"] ]
+"Parser"                    : [ ["latex"] ]
 
 };
 global.constants = {

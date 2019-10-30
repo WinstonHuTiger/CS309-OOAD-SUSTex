@@ -7,9 +7,11 @@ import 'codemirror/addon/comment/comment.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
 import 'codemirror/addon/fold/foldgutter.css';
+import 'codemirror/addon/mode/overlay.js';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
-import { Resizable } from "re-resizable";
+import { Resizable } from 're-resizable';
+import CodeMirrorSpellChecker from 'codemirror-spell-checker';
 
 var codeMirror;
 // 1. a partial latex grammar in simple JSON format
@@ -34,15 +36,13 @@ class LatexEditor extends Component {
     };
   }
   componentDidMount = () => {
-    // 2. parse the grammar into a Codemirror syntax-highlight mode
     var latex_mode = CodeMirrorGrammar.getMode(global.constants.latex_grammar, null, CodeMirror);
-    // 3. use it with Codemirror
+    CodeMirrorSpellChecker({
+    	codeMirrorInstance: CodeMirror,
+    });
     CodeMirror.defineMode("latex", latex_mode);
-    console.log(latex_mode)
-    // enable user-defined code folding in the specification (new feature)
     latex_mode.supportCodeFolding = true;
     CodeMirror.registerHelper("fold", latex_mode.foldType, latex_mode.folder);
-    // enable user-defined code matching in the specification (new feature)
     latex_mode.supportCodeMatching = true;
     latex_mode.matcher.options = {maxHighlightLineLength:1000}; // default
     CodeMirror.defineOption("matching", false, function( cm, val, old ) {
@@ -62,7 +62,6 @@ class LatexEditor extends Component {
     // CodeMirror.registerHelper("lint", "latex", latex_mode.validator);
     // enable user-defined autocompletion (if defined)
     latex_mode.supportAutoCompletion = true;
-    console.log(latex_mode.autocompleter)
     CodeMirror.commands['my_autocompletion'] = function( cm ) {
         CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:true, caseInsensitiveMatch:true});
     };
@@ -72,7 +71,6 @@ class LatexEditor extends Component {
     latex_mode.autocompleter.options = {prefixMatch:true, caseInsensitiveMatch:false, inContext:true};
     // or for dynamic (context-sensitive) autocompletion, extracted from user actions
     latex_mode.autocompleter.options = {prefixMatch:true, caseInsensitiveMatch:false, inContext:true|false, dynamic:true};
-
     codeMirror = CodeMirror(this.editor, {
         mode: "latex",
         lineNumbers: true,
@@ -86,6 +84,7 @@ class LatexEditor extends Component {
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
         value: this.state.text
     });
+   codeMirror.addOverlay({ mode: "spell-checker"});
    codeMirror.on('change',() => {
      this.setState({
        text: codeMirror.getValue()
