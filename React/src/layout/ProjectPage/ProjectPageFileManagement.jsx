@@ -11,7 +11,7 @@ const { Search } = Input;
 const triggerStyle = {
   position: 'absolute',
   top: '50%',
-  zIndex: '10',
+  zIndex: '9999',
   background: '#FFF',
   width: '20px',
   height: '50px',
@@ -75,7 +75,7 @@ class FileManagement extends Component {
     this.state.changeMode("markdown")
   }
 
-  componentDidMount() {  
+  componentDidMount() {
     document.body.onmousemove = (e) => {
       if (e.clientX > 50 && this.state.leftShow) {
         this.setState({
