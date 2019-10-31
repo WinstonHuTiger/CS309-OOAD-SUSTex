@@ -30,10 +30,13 @@ class Header extends Component {
         <Col span={6}>
           <h2 style={logoStyle}>SUSTex</h2>
         </Col>
-        <Col span={4} push={15}>
-          <Button style={githubButtonStyle}>
-            <Icon type="github" /> Login with Github
-          </Button>
+        <Col span={6} push={12}>
+          <Row type="flex" justify="end">
+            <Button style={githubButtonStyle}>
+              <Icon type="github" /> Login with Github
+            </Button>
+            <Col span={2} />
+          </Row>
         </Col>
       </Row>
     </header>
