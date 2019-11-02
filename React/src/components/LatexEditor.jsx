@@ -1,20 +1,16 @@
 import CodeMirror from 'codemirror/lib/codemirror.js';
 import React, { Component } from 'react';
 import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
-import 'codemirror/addon/hint/show-hint.js';
-import 'codemirror/addon/lint/lint.js';
-import 'codemirror/addon/comment/comment.js';
+import '../tools/show-hint.js';
 import 'codemirror/addon/fold/foldcode.js';
 import 'codemirror/addon/fold/foldgutter.js';
 import 'codemirror/addon/fold/foldgutter.css';
-import 'codemirror/addon/mode/overlay.js';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
 import CodeMirrorSpellChecker from 'codemirror-spell-checker';
+import AutoComplete from './AutoComplete';
 
 var codeMirror;
-// 1. a partial latex grammar in simple JSON format
-// 1. an almost complete python grammar in simple JSON format
 const blur = {
   boxShadow: "inset 0 0 2000px rgba(255, 255, 255, .5)",
   filter: "blur(10px)",
@@ -25,7 +21,10 @@ class LatexEditor extends Component {
     super(props);
     this.state = {
       text: this.props.text,
-      id: this.props.id
+      id: this.props.id,
+      autoComplete: false,
+      cursorLeft: 0,
+      cursorTop: 0,
     };
   }
   componentDidMount = () => {
@@ -77,18 +76,33 @@ class LatexEditor extends Component {
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
         value: this.state.text
     });
-   codeMirror.addOverlay({ mode: "spell-checker"});
+   codeMirror.on('blur', () => {
+     CodeMirror.showHint(codeMirror, latex_mode.autocompleter, {prefixMatch:false, caseInsensitiveMatch:false, completeSingle: false});
+   });
    codeMirror.on('change',() => {
+     let start = codeMirror.getTokenAt(codeMirror.getCursor())["start"];
+     let position = codeMirror.cursorCoords({ line: codeMirror.getCursor()["line"], ch: start });
+     this.setState({
+       autoComplete: true,
+       cursorLeft: position.left,
+       cursorTop: position.bottom
+     });
      this.setState({
        text: codeMirror.getValue()
      });
      this.props.updateFater(this.state.text);
    });
    codeMirror.on("keyup", (cm, event) => {
-     var pos = cm.getCursor();
+     let pos = cm.getCursor();
      if (!cm.state.completionActive && pos["ch"] - 1 >= 0 ) {        /*Enter - do not open autocomplete list just after item has been selected in it*/
-        var char = cm.getTokenAt(cm.getCursor())["string"];
+        let char = cm.getTokenAt(cm.getCursor())["string"];
         if (char === "\\" || char === "(" || char === "{" || char === "[") {
+          // let position = cm.getCursor("true");
+          // this.setState({
+          //   autoComplete: true,
+          //   cursorLeft: position.left,
+          //   cursorTop: position.top
+          // });
           CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:false, caseInsensitiveMatch:false, completeSingle: false});
         }
      }
@@ -96,12 +110,18 @@ class LatexEditor extends Component {
   };
   ref = React.createRef();
   render = () => (
-    <div
-      ref={self => this.editor = self}
-      id={this.state.id}
-      style={this.props.blur?blur:null}
-       />
+    <>
+      <div
+        ref={self => this.editor = self}
+        id={this.state.id}
+        style={this.props.blur?blur:null}
+         />
+    </>
   );
 }
-
+// <AutoComplete
+//   display={this.state.autoComplete}
+//   left={this.state.cursorLeft}
+//   top={this.state.cursorTop - 5}
+//   />
 export default LatexEditor;

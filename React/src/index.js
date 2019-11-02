@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import * as serviceWorker from './serviceWorker';
-
 import ProjectPage from './layout/ProjectPage';
 
 ReactDOM.render(<ProjectPage />, document.getElementById('root'));

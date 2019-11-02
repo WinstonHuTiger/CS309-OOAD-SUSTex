@@ -152,3 +152,52 @@
 .CodeMirror .cm-spell-error{
 	border-bottom: 2px solid @red;
 }
+// hint pannel
+.hint-menu.base16-tomorrow-light {
+  margin: 0;
+  padding: 0;
+  color: rgba(0,0,0,0.65);
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  -webkit-font-feature-settings: 'tnum';
+  font-feature-settings: 'tnum';
+  position: absolute;
+  z-index: 1050;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-variant: initial;
+  background-color: #fff;
+  border-radius: 4px;
+  outline: none;
+  -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+// non-selected word
+.hint-item {
+  position: relative;
+  display: block;
+  padding: 5px 12px;
+  overflow: hidden;
+  color: rgba(0,0,0,0.65);
+  font-weight: normal;
+  line-height: 22px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  -webkit-transition: background .3s ease;
+  transition: background .3s ease;
+}
+// selected word
+.CodeMirror-hint .cmg-autocomplete-keyword-hint .CodeMirror-hint-active {
+
+}
+// match word
+.cmg-autocomplete-keyword {
+
+}
+// description
+.cmg-autocomplete-keyword-meta {
+  display: none;
+}

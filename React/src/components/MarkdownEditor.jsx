@@ -4,8 +4,8 @@ import 'codemirror/mode/javascript/javascript.js';
 import React, { Component } from 'react';
 import 'codemirror/mode/markdown/markdown';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/addon/hint/show-hint.js';
-import 'codemirror/addon/hint/show-hint.css';
+// import 'codemirror/addon/hint/show-hint.js';
+// import 'codemirror/addon/hint/show-hint.css';
 import javascriptHint from 'codemirror/addon/hint/javascript-hint.js'
 
 var codeMirror;
