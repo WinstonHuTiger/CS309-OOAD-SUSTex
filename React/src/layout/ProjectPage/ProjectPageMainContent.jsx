@@ -7,7 +7,6 @@ import { Resizable } from "re-resizable";
 import '../css/custom.css';
 const { Content } = Layout;
 const contentStyle = {
-  paddingTop: '64px',
   height: '100%',
   width: '100%'
 };

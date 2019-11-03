@@ -42,7 +42,10 @@ class ProjectPage extends React.Component {
     return (
       <Layout>
           <ProjectPageHeader />
-        <Layout>
+        <Layout
+          style={{
+            marginTop: "64px"
+          }}>
           <ProjectPageFileManagement
             changeMode={this.changeMode}
             />

@@ -283,9 +283,6 @@ const latex_grammar = {
 "Parser"                    : [ ["latex"] ]
 
 };
-const latex_basic = [
-  "\\begin{}", "\\begin{}[]", "\\begin{}{}", "\\usepackage[]{}", "\\usepackage{}"
-];
 const latex_autocomplete = [
   {
     "start": "\\usepackage{}",
@@ -540,5 +537,4 @@ const latex_autocomplete = [
 global.constants = {
   latex_grammar: latex_grammar,
   latex_autocomplete: latex_autocomplete,
-  latex_basic: latex_basic
 }

@@ -1,3 +1,4 @@
+/* eslint  no-unused-vars: "off" */
 import CodeMirror from 'codemirror/lib/codemirror.js';
 import React, { Component } from 'react';
 import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
@@ -17,7 +18,6 @@ const blur = {
   filter: "blur(10px)",
   transition: "all 0.3s ease-out"
 };
-
 function concatenate(item, start) {
   let str = item.start;
   let tab = "";
@@ -28,7 +28,7 @@ function concatenate(item, start) {
     for (var x = 0; x < item.items.length; x++) {
       str += "\n" + tab + "\t" + item.items[x];
     }
-  } else if (str != "\\usepackage{}" && str != "\\end{}") {
+  } else if (str !== "\\usepackage{}" && str !== "\\end{}") {
     str += "\n" + tab + "\t";
   }
   if (item.end){
@@ -55,12 +55,7 @@ function html_escaper_entities( c )
     ;
 }
 
-var escaped_re = /([.*+?^${}()|[\]\/\\\-])/g,
-    html_special_re = /[&"'<>]/g,
-    de_html_special_re = /&(amp|lt|gt|apos|quot);/g,
-    peg_bnf_special_re = /^([.!&\[\]{}()*+?\/|'"]|\s)/,
-    default_combine_delimiter = "\\b",
-    combine_delimiter = "(\\s|\\W|$)" /* more flexible than \\b */;
+var html_special_re = /[&"'<>]/g;
 
 function esc_html( s, entities )
 {
@@ -109,7 +104,7 @@ function autocompleter(cm, options) {
   };
   for (var x = 0; x < global.constants.latex_autocomplete.length; x++) {
     let item = global.constants.latex_autocomplete[x];
-    if (prefixMatch(item.start, token.string) && token.string.length != 0) {
+    if (prefixMatch(item.start, token.string) && token.string.length !== 0) {
       let str = concatenate(item, token.start);
       let push = {
         text: str,
@@ -125,7 +120,6 @@ function autocompleter(cm, options) {
       list.list.push(push);
     }
   }
-  console.log(list)
   return list;
 };
 
@@ -147,14 +141,14 @@ function getToken(cm) {
   let lineContent = cm.getLine(pos.line);
   let end = pos.ch;
   let start = 0;
-  for (var x = end - 1; x >= 0; x--) {
-    if (lineContent.charAt(x) == " ") {
+  for (let x = end - 1; x >= 0; x--) {
+    if (lineContent.charAt(x) === " ") {
       start = x + 1;
       break;
     }
   }
   let string = "";
-  for (var x = start; x <= end; x++) {
+  for (let x = start; x <= end; x++) {
     string += lineContent.charAt(x);
   }
   return {
@@ -242,27 +236,27 @@ class LatexEditor extends Component {
    codeMirror.on("keyup", (cm, event) => {
      let pos = cm.getCursor();
      if (cm.state.completionActive) {
-       if (cm.state.completionActive.data.list.length == 0) {
+       if (cm.state.completionActive.data.list.length === 0) {
          cm.state.completionActive.close();
        }
      }
      let boolean = false;
      if (!cm.state.completionActive && pos["ch"] - 1 >= 0 ) {
        let token = getToken(cm);
-       let char = cm.getTokenAt(cm.getCursor())["string"];
-       for (var x = 0; x < global.constants.latex_basic.length; x++) {
-         if (prefixMatch(global.constants.latex_basic[x], token.string)) {
+       for (var x = 0; x < global.constants.latex_autocomplete.length; x++) {
+         if (prefixMatch(global.constants.latex_autocomplete[x].name, token.string)) {
            boolean = true;
            break;
          }
        }
+      let lastChar = cm.getLine(pos.line).charAt(pos.ch - 2);
       let nextChar = cm.getLine(pos.line).charAt(pos.ch);
-      if (nextChar == "}" || nextChar == "]") {
+      if (nextChar === "}" || nextChar === "]") {
         boolean = false;
       }
       if (boolean) {
         CodeMirror.showHint(cm, autocompleter, {completeSingle: false});
-      }else if (char[0] == "\\" || char[0] === "(" || char[0] === "{" || char[0] === "[") {
+      }else if (lastChar === "\\" || lastChar === "(" || lastChar === "{" || lastChar === "[") {
         CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:true, caseInsensitiveMatch:false, completeSingle: false});
       }
      }
