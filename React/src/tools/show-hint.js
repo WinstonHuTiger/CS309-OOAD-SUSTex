@@ -97,6 +97,12 @@
       else this.cm.replaceRange(getText(completion), completion.from || data.from,
                                 completion.to || data.to, "complete");
       CodeMirror.signal(data, "pick", completion);
+      if (completion.chOffset || completion.lineOffset) {
+        let cursorPosition = this.cm.getCursor();
+        cursorPosition["line"] -= completion.lineOffset;
+        cursorPosition["ch"] -= completion.chOffset;
+        this.cm.setCursor(cursorPosition);
+      }
       this.close();
     },
 
@@ -232,7 +238,7 @@
       elt.className = className;
       if (completions.length == 1) { elt.style.borderRadius = "4px 4px 4px 4px"; }
       if (cur.render) cur.render(elt, data, cur);
-      else elt.appendChild(ownerDocument.createTextNode(cur.displayText || getText(cur)));
+      else elt.appendChild(ownerDocument.createTextNode(cur.displayText || cur.name));
       elt.hintId = i;
     }
 

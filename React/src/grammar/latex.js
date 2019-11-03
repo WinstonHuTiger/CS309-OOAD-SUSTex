@@ -283,6 +283,262 @@ const latex_grammar = {
 "Parser"                    : [ ["latex"] ]
 
 };
+const latex_basic = [
+  "\\begin{}", "\\begin{}[]", "\\begin{}{}", "\\usepackage[]{}", "\\usepackage{}"
+];
+const latex_autocomplete = [
+  {
+    "start": "\\usepackage{}",
+    "items": null,
+    "end": null,
+    "name": "\\usepackage{}",
+    "jumpto": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "start": "\\begin{}",
+    "items": null,
+    "end": "\\end{}",
+    "name": "\\begin{}",
+    "jumpto": {
+      "line": 2,
+      "ch": -1
+    }
+  },
+  {
+    "start": "\\begin{}[]",
+    "items": null,
+    "end": "\\end{}[]",
+    "name": "\\begin{}[]",
+    "jumpto": {
+      "line": 2,
+      "ch": 1
+    }
+  },
+  {
+    "start": "\\begin{}{}",
+    "items": null,
+    "end": "\\end{}{}",
+    "name": "\\begin{}{}",
+    "jumpto": {
+      "line": 2,
+      "ch": 1
+    }
+  },
+  {
+    "start": "\\end{}",
+    "items": null,
+    "end": null,
+    "name": "\\end{}",
+    "jumpto": {
+      "line": 0,
+      "ch": 1
+    }
+  },
+  {
+    "start": "\\begin{enumerate}",
+    "items": [
+      "\\item ",
+    ],
+    "end": "\\end{enumerate}",
+    "name": "\\begin{enumerate}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{abstract}",
+    "items": null,
+    "end": "\\end{abstract}",
+    "name": "\\begin{abstract}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{align}",
+    "items": null,
+    "end": "\\end{align}",
+    "name": "\\begin{align}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{equation}",
+    "items": null,
+    "end": "\\end{equation}",
+    "name": "\\begin{equation}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{gather}",
+    "items": null,
+    "end": "\\end{gather}",
+    "name": "\\begin{gather}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{verbatim}",
+    "items": null,
+    "end": "\\end{verbatim}",
+    "name": "\\begin{verbatim}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{quote}",
+    "items": null,
+    "end": "\\end{quote}",
+    "name": "\\begin{quote}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{center}",
+    "items": null,
+    "end": "\\end{center}",
+    "name": "\\begin{center}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{array}{cc}",
+    "items": [
+      "&  \\\\",
+      "&"
+    ],
+    "end": "\\end{array}",
+    "name": "\\begin{array}",
+    "jumpto": {
+      "line": 3,
+      "ch": -5
+    }
+  },
+  {
+    "start": "\\begin{figure}",
+    "items": [
+      "\\centering",
+      "\\includegraphics{}",
+      "\\caption{Caption}",
+      "\\label{fig:my_label}"
+    ],
+    "end": "\\end{figure}",
+    "name": "\\begin{figure}",
+    "jumpto": {
+      "line": 3,
+      "ch": -6
+    }
+  },
+  {
+    "start": "\\begin{table}[]",
+    "items": [
+      "\\centering",
+      "\\begin{tabular}{c|c}",
+      "\t&  \\",
+      "\t& ",
+      "\\end{tabular}",
+      "\\caption{Caption}",
+      "\\label{tab:my_label}",
+    ],
+    "end": "\\end{table}",
+    "name": "\\begin{table}",
+    "jumpto": {
+      "line": 6,
+      "ch": -9
+    }
+  },
+  {
+    "start": "\\begin{tabular}{c|c}",
+    "items": [
+      "&  \\\\",
+      "&"
+    ],
+    "end": "\\end{tabular}",
+    "name": "\\begin{tabular}",
+    "jumpto": {
+      "line": 3,
+      "ch": -6
+    }
+  },
+  {
+    "start": "\\begin{list}",
+    "items": [
+      "\\item "
+    ],
+    "end": "\\end{list}",
+    "name": "\\begin{list}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{itemize}",
+    "items": [
+      "\\item "
+    ],
+    "end": "\\end{itemize}",
+    "name": "\\begin{itemize}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{frame}{Frame Title}",
+    "items": null,
+    "end": "\\end{frame}",
+    "name": "\\begin{frame}",
+    "jumpto": {
+      "line": 2,
+      "ch": -14
+    }
+  },
+  {
+    "start": "\\begin{document}",
+    "items": null,
+    "end": "\\end{document}",
+    "name": "\\begin{document}",
+    "jumpto": {
+      "line": 1,
+      "ch": 0
+    }
+  },
+  {
+    "start": "\\begin{thebibliography}{}",
+    "items": [
+      "\\bibitem{}"
+    ],
+    "end": "\\end{thebibliography}",
+    "name": "\\begin{thebibliography}",
+    "jumpto": {
+      "line": 2,
+      "ch": -3
+    }
+  },
+
+
+];
 global.constants = {
-  latex_grammar: latex_grammar
+  latex_grammar: latex_grammar,
+  latex_autocomplete: latex_autocomplete,
+  latex_basic: latex_basic
 }
