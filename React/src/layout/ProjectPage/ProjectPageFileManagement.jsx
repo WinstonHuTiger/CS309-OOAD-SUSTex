@@ -96,6 +96,7 @@ class FileManagement extends Component {
         onCollapse={this.onCollapse}
         theme="light"
         collapsedWidth="0"
+        id="files"
         trigger={null}>
           <Menu theme="light"
           mode="inline"

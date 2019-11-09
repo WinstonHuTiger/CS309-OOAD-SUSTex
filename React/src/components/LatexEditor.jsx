@@ -212,6 +212,7 @@ class LatexEditor extends Component {
         lineNumbers: true,
         indentUnit: 4,
         indentWithTabs: true,
+        lineWrapping: true,
         lint: true,  // enable lint validation
         matching: true,  // enable token matching, e.g braces, tags etc..
         extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment"},

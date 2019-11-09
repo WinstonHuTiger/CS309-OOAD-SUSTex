@@ -52,7 +52,8 @@ class MainContent extends Component {
         width: "50%",
         height: "100%"
       },
-      showRightButton: false
+      showRightButton: false,
+      currentWidth: document.body.clientWidth * 0.5 - 10,
     }
   }
 
@@ -132,6 +133,12 @@ class MainContent extends Component {
                   if(this.state.hide)
                     return;
                   let width = refToElement.style.width;
+                  let widthpx = refToElement.getBoundingClientRect().width
+                  let leftpx = refToElement.getBoundingClientRect().left
+                  let tmp = document.body.clientWidth - (widthpx + leftpx) - 10
+                  this.setState({
+                    currentWidth: tmp + "px"
+                  })
                   let hideIcon = document.getElementById("hideIcon");
                   if (hideIcon != null){
                     let pos = hideIcon.getClientRects()[0];
@@ -253,15 +260,23 @@ class MainContent extends Component {
                     Hide
                   </div>
                  </div>):(null)}
-                 <MarkdownRender
-                   id="render"
-                   className="markdown"
-                   blur={this.state.max}
-                   source={this.state.value}
-                   hide={this.state.hideRender}
-                   show={this.showRender}
-                   showButton={this.state.showRightButton}
-                 />
+              {this.props.mode == "markdown" ? (
+                <MarkdownRender
+                  id="render"
+                  className="markdown"
+                  blur={this.state.max}
+                  source={this.state.value}
+                  hide={this.state.hideRender}
+                  show={this.showRender}
+                  showButton={this.state.showRightButton}
+                />
+              ) : (
+                <iframe
+                  className="pdf-render"
+                  src="/pdfjs-2.2.228-dist/web/viewer.html?file=https://arxiv.org/pdf/1704.04861.pdf"
+                  width={this.state.currentWidth}
+                  />
+              )}
           </Col>
         </Row>
       </Content>

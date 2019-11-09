@@ -69,3 +69,9 @@ html {
 .right-show {
   right: -5px;
 }
+
+.pdf-render {
+  position: absolute;
+  right: 0;
+  height: 100%;
+}
