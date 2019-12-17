@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from SUSTex import views
-from SUSTex.models import github_login
+from SUSTex import github_login
 
 
 urlpatterns = [
@@ -23,5 +23,9 @@ urlpatterns = [
     path('login/github/complete', github_login.complete),
     path('testlogin/', github_login.test_login),
     path('logout/', views.logout),
-    path('user/', views.get_user_info)
+    path('user/', views.get_user_info),
+    path('project/create/', views.create_project),
+    path('project/<str:random_str>/create/version/<str:filename>', views.create_version),
+    path('project/<str:random_str>/edit/<str:filename>', views.edit_doc),
+    path('project/<str:random_str>/create/document/<str:filename>', views.create_doc),
 ]
