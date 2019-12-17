@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.http import HttpResponse
-from SUSTex.models import User, Project, Document, UserProject
+from SUSTex.models import User, Project, Document, UserProject, Authorization
 import os
 import json
 
@@ -14,8 +14,9 @@ def logout(request):
     return HttpResponse('Logout!')
 
 
-@login_required(login_url='/login/github/')
+
 def get_user_info(request):
+    print(request.user.is_authenticated)
     user = User.objects.get(id=request.user.id)
     return HttpResponse(user)
 
@@ -97,17 +98,50 @@ def get_project_info(request, random_str):
     return HttpResponse(info)
 
 
-def authorize_to_other(request, random_str):
+def authorize_to_other(request, random_str, authority):
     if not request.user.is_authenticated:
         return HttpResponse('Not login yet, please login first.')
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return HttpResponse('Project does not exist!')
-    proje
+    project = response[0]
     user = User.objects.get(id=request.user.id)
-    user_project = UserProject.objects.filter(project=)
+    response = UserProject.objects.filter(project=project, user=user)
+    if response.count() == 0:
+        return HttpResponse('You have not been add to this project.')
+    user_project = response[0]
+    if user_project.authority != 'rw':
+        return HttpResponse('You have no authority to authorize others.')
+    response = Authorization.objects.filter(user=user, project=project)
+    if authority == 'rw' and authority == 'r':
+        return HttpResponse('Invalid authority')
+    if response.count() != 0:
+        authorization = response[0]
+        authorization.authority = authority
+        authorization.save()
+        return HttpResponse(response[0])
+    else:
+        authorization = Authorization(project=project, user=user, authority=authority)
+        authorization.get_random_code()
+        authorization.save()
+        return HttpResponse(authorization)
 
 
-def authorize_user(request, random_str, authorize_code):
-    return
+def authorize_user(request, code):
+    if not request.user.is_authenticated:
+        return HttpResponse('Not login yet, please login first.')
+    user = User.objects.get(id=request.user.id)
+    response = Authorization.objects.filter(code=code)
+    if response.count() == 0:
+        return HttpResponse('Authorization code is invalid')
+    authorization = response[0]
+    response = UserProject.objects.filter(project=authorization.project, user=user)
+    if response.count() != 0:
+        return HttpResponse('You already in this project')
+    user_project = UserProject(user=user, project=authorization.project, authority=authorization.authority)
+    user_project.save()
+    authorization.delete()
+    return HttpResponse(user_project)
+
+
 

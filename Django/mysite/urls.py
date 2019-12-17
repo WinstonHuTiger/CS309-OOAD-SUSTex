@@ -24,11 +24,11 @@ urlpatterns = [
     path('testlogin/', github_login.test_login),
     path('logout/', views.logout),
     path('user/', views.get_user_info),
-    path('project/create/<str:project_name>', views.create_project),
-    path('project/<str:random_str>/authorize/', views.authorize_user),
-    path('project/<str:random_str>/authorize/<str:authorize_code>', views.)
-    path('project/<str:random_str>/create/version/<str:filename>', views.create_version),
-    path('project/<str:random_str>/edit/<str:filename>', views.edit_doc),
-    path('project/<str:random_str>/create/document/<str:filename>', views.create_doc),
+    path('project/create/<str:project_name>/', views.create_project),
+    path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
+    path('project/authorize/<str:code>/', views.authorize_user),
+    path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
+    path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),
+    path('project/<str:random_str>/create/document/<str:filename>/', views.create_doc),
     path('project/<str:random_str>/', views.get_project_info),
 ]

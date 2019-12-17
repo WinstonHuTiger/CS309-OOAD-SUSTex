@@ -131,6 +131,9 @@ class UserProject(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     authority = models.CharField(max_length=2, default='rw', null=False)
 
+    class Meta:
+        unique_together = ('project', 'user')
+
     def __str__(self):
         data = {'project': self.project.id, 'user': self.user.id, 'authority': self.authority}
         return get_json(data)
@@ -141,9 +144,27 @@ class Document(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     filename = models.CharField(max_length=50, null=False)
     version = models.IntegerField(default=0)
-    date = models.DateField(auto_now=True)
+    date = models.DateTimeField(auto_now=True)
+    content = models.TextField(default='')
 
     def __str__(self):
         data = {'id': self.id, 'project': self.project, 'version': self.version}
         return get_json(data)
 
+
+class Authorization(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    code = models.CharField(max_length=30, unique=True)
+    date = models.DateTimeField(auto_now=True)
+    authority = models.CharField(max_length=2, default='rw', null=False)
+
+    def get_random_code(self):
+        self.code = ''.join(random.sample(string.ascii_letters + string.digits, 30))
+        if Authorization.objects.filter(code=self.code).count() != 0:
+            self.get_random_code()
+
+    def __str__(self):
+        data = {"id": self.id, "user": self.user.id, "code": self.code, "authority": self.authority,
+                "date": str(self.date)}
+        return get_json(data)
