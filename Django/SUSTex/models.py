@@ -6,9 +6,33 @@ import random
 import string
 
 MAX_VERSION_NUM = 5
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SUPPORT_IMAGE_TYPE = ['eps', 'jpg', 'png', 'tiff']
 
 # Create your models here.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+# https://www.cnblogs.com/renfanzi/p/8243777.html
+def list_dir(path, res):
+    for i in os.listdir(path):
+        temp_dir = os.path.join(path, i)
+        if os.path.isdir(temp_dir):
+            temp = {"dirname": i, "child_dirs": [], "files": []}
+            res['child_dirs'].append(list_dir(temp_dir, temp))
+        else:
+            _type = 'unknown'
+            postfix = i.split('.')[-1]
+            if postfix == 'tex':
+                _type = 'LaTex'
+            elif postfix == 'md':
+                _type = 'Markdown'
+            elif postfix in SUPPORT_IMAGE_TYPE:
+                _type = 'Image'
+            elif postfix == 'pdf':
+                _type = 'PDF'
+            file = {"filename": i, "type": _type}
+            res['files'].append(file)
+    return res
 
 
 def get_json(data: dict):
@@ -52,6 +76,7 @@ class Project(models.Model):
         else:
             os.makedirs(path)
             print("Create project folder successfully.")
+        return path
 
     def create_document(self, filename=None):
         if filename is None:
@@ -84,6 +109,22 @@ class Project(models.Model):
         document.save()
         # replace content here
 
+    def get_info(self):
+        path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
+        res = {'dirname': 'root', 'child_dirs': [], 'files': []}
+        list_dir(path, res)
+        res['random_str'] = self.random_str
+        res['user_info'] = self.get_users()
+        return get_json(res)
+
+    def get_users(self):
+        response = UserProject.objects.filter(project=self)
+        lst = []
+        for i in response:
+            lst.append({"user": i.user.id, "authority": i.authority})
+        data = {'users': lst}
+        return data
+
 
 class UserProject(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
@@ -91,7 +132,7 @@ class UserProject(models.Model):
     authority = models.CharField(max_length=2, default='rw', null=False)
 
     def __str__(self):
-        data = {'project': self.project, 'user': self.user, 'authority': self.authority}
+        data = {'project': self.project.id, 'user': self.user.id, 'authority': self.authority}
         return get_json(data)
 
 

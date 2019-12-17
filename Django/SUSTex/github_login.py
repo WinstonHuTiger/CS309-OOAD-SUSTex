@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from SUSTex.models import User
@@ -16,9 +15,8 @@ TOKEN_API_URL = 'https://github.com/login/oauth/access_token?client_id=%s&client
                 % (GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
 
 
-@login_required(login_url='/login/github/')
 def test_login(request):
-    return HttpResponse('Already login.')
+    return HttpResponse(request.user.is_authenticated)
 
 
 def login(request):
