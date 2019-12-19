@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from SUSTex.models import User
 from django.contrib import auth
 import requests
+from django.views.decorators.csrf import csrf_protect
 
 LOGIN_SCOPE = 'read:user'
 GITHUB_CLIENT_ID = '7fef2786398de055aad1'
