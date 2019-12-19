@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from SUSTex.models import User, Project, Document, UserProject, Authorization
 import os
 import json
+from Utils.diff_match_patch import diff_match_patch
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -14,10 +15,11 @@ def logout(request):
     return HttpResponse('Logout!')
 
 
-
 def get_user_info(request):
-    print(request.user.is_authenticated)
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first.')
     user = User.objects.get(id=request.user.id)
+    print(request.session)
     return HttpResponse(user)
 
 
@@ -52,14 +54,6 @@ def create_file(request):
     return HttpResponse('Create files')
 
 
-def get_all_versions(request):
-    return HttpResponse('Get all versions')
-
-
-def compare_version(request):
-    return HttpResponse('Compare version')
-
-
 def edit_doc(request, random_str, filename):
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
@@ -78,15 +72,6 @@ def create_doc(request, random_str, filename):
     project = response[0]
     project.create_document(filename)
     return HttpResponse('Create document successfully.')
-
-
-def create_version(request, random_str, filename):
-    response = Project.objects.filter(random_str=random_str)
-    if response.count() == 0:
-        return HttpResponse('Project does not exist!')
-    project = response[0]
-    project.create_version(filename)
-    return HttpResponse('Create version.')
 
 
 def get_project_info(request, random_str):
@@ -144,4 +129,87 @@ def authorize_user(request, code):
     return HttpResponse(user_project)
 
 
+def upload_file(request):
+    return HttpResponse('upload')
 
+
+def delete_file(request):
+    return HttpResponse('delete')
+
+
+def delete_file(request):
+    return HttpResponse('delete')
+
+
+def rename_file(request):
+    return HttpResponse('rename file')
+
+
+def get_current_users(request):
+    return HttpResponse('get current users')
+
+
+def get_user_projects(request):
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first.')
+    user = User.objects.get(id=request.user.id)
+    response = UserProject.objects.filter(user=user)
+    lst = []
+    for i in response:
+        lst.append(i.get_dict())
+    return HttpResponse(json.dumps(lst))
+
+
+def get_versions(request, random_str, filename):
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first')
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Invalid url')
+    project = response[0]
+    response = Document.objects.filter(project=project, filename=filename)
+    if response.count() == 0:
+        return HttpResponse('Invalid url')
+    lst = []
+    for i in response:
+        lst.append(i.get_dict())
+    return HttpResponse(json.dumps(lst))
+
+
+def compare_versions(request, random_str, filename):
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first')
+    user = User.objects.get(id=request.user.id)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Project does not exist.')
+    project = response[0]
+    response = Document.objects.filter(project=project, filename=filename)
+    if response.count() == 0:
+        return HttpResponse('Document does not exist.')
+    version_one = int(request.GET['version_one'])
+    version_two = int(request.GET['version_two'])
+    document_one = None
+    document_two = None
+    for i in response:
+        if i.version == version_one:
+            document_one = i
+        elif i.version == version_two:
+            document_two = i
+    if document_one is None:
+        return HttpResponse("Document '%s' version: %d does not exist" % (filename, version_one))
+    if document_two is None:
+        return HttpResponse("Document '%s' version: %d does not exist" % (filename, version_two))
+    dmp = diff_match_patch()
+    diffs = dmp.diff_main(text1=document_one.content, text2=document_two.content)
+    dmp.diff_cleanupSemantic(diffs)
+    return HttpResponse(json.dumps(diffs))
+
+
+def create_version(request, random_str, filename):
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Project does not exist!')
+    project = response[0]
+    project.create_version(filename)
+    return HttpResponse('Create version.')

@@ -21,14 +21,21 @@ from SUSTex import github_login
 urlpatterns = [
     path('login/github/', github_login.login),
     path('login/github/complete', github_login.complete),
-    path('testlogin/', github_login.test_login),
     path('logout/', views.logout),
     path('user/', views.get_user_info),
+    path('user/projects', views.get_user_projects),
     path('project/create/<str:project_name>/', views.create_project),
     path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
     path('project/authorize/<str:code>/', views.authorize_user),
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
-    path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),
+    path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),  #
     path('project/<str:random_str>/create/document/<str:filename>/', views.create_doc),
     path('project/<str:random_str>/', views.get_project_info),
+    path('project/<str:random_str>/upload/', views.upload_file),  #
+    path('project/<str:random_str>/delete/<str:filepath>/', views.delete_file),  #
+    path('project/<str:random_str>/rename/<str:filepath>/', views.rename_file),  #
+    path('project/<str:random_str>/users/current/', views.get_current_users),  #
+    path('project/<str:random_str>/<str:filename>/versions/compare/', views.compare_versions),
+    path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
+    path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
 ]

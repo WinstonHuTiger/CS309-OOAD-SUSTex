@@ -4,6 +4,7 @@ import json
 import os
 import random
 import string
+import time
 
 MAX_VERSION_NUM = 5
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +31,9 @@ def list_dir(path, res):
                 _type = 'Image'
             elif postfix == 'pdf':
                 _type = 'PDF'
-            file = {"filename": i, "type": _type}
+            mtime = os.stat(temp_dir).st_mtime
+            file_modify_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
+            file = {"filename": i, "type": _type, 'last_modify': file_modify_time}
             res['files'].append(file)
     return res
 
@@ -58,6 +61,7 @@ class Project(models.Model):
     random_str = models.CharField(max_length=30, null=False, default='####################', unique=True)
     name = models.CharField(max_length=50, null=True)
     type = models.CharField(max_length=4, default='latex', null=False)
+    last_modify = models.DateTimeField(auto_now=True)
 
     def generate_random_str(self):
         self.random_str = ''.join(random.sample(string.ascii_letters + string.digits, 30))
@@ -65,7 +69,8 @@ class Project(models.Model):
             self.generate_random_str()
 
     def __str__(self):
-        data = {'id': self.id, 'random_str': self.random_str, 'name': self.name, 'type':self.type}
+        data = {'id': self.id, 'random_str': self.random_str, 'name': self.name, 'type':self.type,
+                "last_modify": str(self.last_modify)}
         return get_json(data)
 
     def create_project_path(self):
@@ -85,7 +90,7 @@ class Project(models.Model):
         versions = query_doc.count()
         if versions != 0:
             raise RuntimeError('Document already created!')
-        document = Document(project_id=self.id, filename=filename, version=1)
+        document = Document(project=self, filename=filename, version=1)
         document.project = self
         document.save()
         path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
@@ -104,7 +109,7 @@ class Project(models.Model):
             raise RuntimeError('Cannot create more than five versions for one document.')
         elif versions == 0:
             raise RuntimeError('Document does not exist!')
-        document = Document(project_id=self.id, filename=filename, version=versions+1)
+        document = Document(project=self, filename=filename, version=versions+1)
         document.project = self
         document.save()
         # replace content here
@@ -138,18 +143,25 @@ class UserProject(models.Model):
         data = {'project': self.project.id, 'user': self.user.id, 'authority': self.authority}
         return get_json(data)
 
+    def get_dict(self):
+        return {"project": self.project.random_str, "name": self.project.name, "last_modify": str(self.project.last_modify),
+                "authority": self.authority}
+
 
 class Document(models.Model):
     id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     filename = models.CharField(max_length=50, null=False)
     version = models.IntegerField(default=0)
-    date = models.DateTimeField(auto_now=True)
+    last_modify = models.DateTimeField(auto_now=True)
     content = models.TextField(default='')
 
     def __str__(self):
-        data = {'id': self.id, 'project': self.project, 'version': self.version}
+        data = {'id': self.id, 'project': self.project.random_str, 'version': self.version}
         return get_json(data)
+
+    def get_dict(self):
+        return {"project": self.project.random_str, "version": self.version, "last_modify": str(self.last_modify)}
 
 
 class Authorization(models.Model):

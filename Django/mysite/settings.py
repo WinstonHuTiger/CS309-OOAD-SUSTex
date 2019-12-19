@@ -122,3 +122,8 @@ TIME_ZONE = 'Asia/Shanghai'  # <--
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# <---
+SESSION_COOKIE_AGE = 60*30
+SESSION_COOKIE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True

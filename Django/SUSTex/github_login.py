@@ -15,10 +15,6 @@ TOKEN_API_URL = 'https://github.com/login/oauth/access_token?client_id=%s&client
                 % (GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
 
 
-def test_login(request):
-    return HttpResponse(request.user.is_authenticated)
-
-
 def login(request):
     return redirect(to=LOGIN_API_URL, permanent=False)
 
@@ -42,4 +38,5 @@ def complete(request):
     else:
         print('already exist')
     auth.login(request, User.objects.get(github_id=github_id))
+    request.session.set_expiry(0)
     return HttpResponse('Login Successfully!')
