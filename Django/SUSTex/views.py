@@ -7,7 +7,8 @@ import json
 from Utils.diff_match_patch import diff_match_patch
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+USER_FILES_DIR = os.path.join(BASE_DIR, 'UserData/Projects/')
+ALLOWED_POSTFIX = ['tex', 'bib', 'txt', 'md']
 
 # Create your views here.
 def logout(request):
@@ -27,7 +28,8 @@ def upload_file(request):
     return HttpResponse('Upload file')
 
 
-def create_project(request, project_name):
+def create_project(request):
+    project_name = request.GET['name']
     if not request.user.is_authenticated:
         return HttpResponse('Not login yet, please login first.')
     user = User.objects.filter(id=request.user.id)[0]
@@ -50,8 +52,83 @@ def get_files(request):
     return HttpResponse('Get files')
 
 
-def create_file(request):
-    return HttpResponse('Create files')
+def file_manage_verify(request, random_str):
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first')
+    user = User.objects.get(id=request.user.id)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Project does not exist')
+    project = response[0]
+    response = UserProject.objects.filter(user=user, project=project)
+    if response.count() == 0:
+        return HttpResponse('You are not in this project yet')
+    user_project = response[0]
+    if user_project.authority != 'rw':
+        return HttpResponse('You cannot create files')
+    return None
+
+
+def create_file(request, random_str):
+    filepath = request.GET['filepath']
+    filename = request.GET['filename']
+    verify = file_manage_verify(request, random_str)
+    if verify is not None:
+        return verify
+    lst = filename.split('.')
+    if len(lst) == 1:
+        return HttpResponse('You cannot create a file without a postfix')
+    postfix = lst[-1]
+    if postfix not in ALLOWED_POSTFIX:
+        return HttpResponse('Invalid file type')
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    project_path = os.path.join(project_path, filepath)
+    filepath = os.path.join(project_path, filename)
+    file = open(filepath, 'w+')
+    file.close()
+    return HttpResponse(postfix)
+
+
+def create_path(request, random_str):
+    filepath = request.GET['filepath'].split('/')
+    verify = file_manage_verify(request, random_str)
+    if verify is not None:
+        return verify
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    for i in filepath:
+        project_path = os.path.join(project_path, i)
+        if not os.path.isdir(project_path):
+            os.makedirs(project_path)
+    return HttpResponse("create path successfully")
+
+
+def delete_file(request, random_str):
+    filepath = request.GET['filepath']
+    filename = request.GET['filename']
+    verify = file_manage_verify(request, random_str)
+    if verify is not None:
+        return verify
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    project_path = os.path.join(project_path, filepath)
+    filepath = os.path.join(project_path, filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+        return HttpResponse('Delete successfully')
+    return HttpResponse('This file or path does not exist')
+
+
+def delete_path(request, random_str):
+    filepath = request.GET['filepath']
+    verify = file_manage_verify(request, random_str)
+    if verify is not None:
+        return verify
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    project_path = os.path.join(project_path, filepath)
+    if os.path.isdir(project_path):
+        import shutil
+        shutil.rmtree(project_path)
+        return HttpResponse('Remove folder successfully')
+    return HttpResponse('This path does not exist')
 
 
 def edit_doc(request, random_str, filename):
@@ -65,7 +142,8 @@ def edit_doc(request, random_str, filename):
     return HttpResponse('Edit File')
 
 
-def create_doc(request, random_str, filename):
+def create_doc(request, random_str):
+    filename = request.GET['filename']
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return HttpResponse('Project does not exist!')
@@ -133,16 +211,17 @@ def upload_file(request):
     return HttpResponse('upload')
 
 
-def delete_file(request):
-    return HttpResponse('delete')
-
-
-def delete_file(request):
-    return HttpResponse('delete')
-
-
-def rename_file(request):
-    return HttpResponse('rename file')
+def rename_file(request, random_str):
+    filename = request.GET['filename']
+    filepath = request.GET['filepath']
+    new_name = request.GET['new_name']
+    verify = file_manage_verify(request, random_str)
+    if verify is not None:
+        return verify
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    project_path = os.path.join(project_path, filepath)
+    os.rename(os.path.join(project_path, filename), os.path.join(project_path, new_name))
+    return HttpResponse('Rename file successfully')
 
 
 def get_current_users(request):
@@ -213,3 +292,16 @@ def create_version(request, random_str, filename):
     project = response[0]
     project.create_version(filename)
     return HttpResponse('Create version.')
+
+
+def rename_project(request, random_str):
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first')
+    user = User.objects.get(id=request.user.id)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Project dose not exist')
+    project = response[0]
+    project.name = request.GET['name']
+    project.save()
+    return HttpResponse('Rename successfully')

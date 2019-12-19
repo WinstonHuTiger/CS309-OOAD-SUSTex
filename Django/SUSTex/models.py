@@ -120,6 +120,7 @@ class Project(models.Model):
         list_dir(path, res)
         res['random_str'] = self.random_str
         res['user_info'] = self.get_users()
+        res['name'] = self.name
         return get_json(res)
 
     def get_users(self):
