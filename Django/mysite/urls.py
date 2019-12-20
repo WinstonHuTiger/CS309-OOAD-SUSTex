@@ -14,8 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from SUSTex import views
-from SUSTex import github_login
+from SUSTex.views.login import github_login
+from SUSTex.views import file_operation, views
 
 
 urlpatterns = [
@@ -31,14 +31,14 @@ urlpatterns = [
     path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),  #
     path('project/<str:random_str>/create/document/', views.create_doc),
     path('project/<str:random_str>/', views.get_project_info),
-    path('project/<str:random_str>/create/file/', views.create_file),
-    path('project/<str:random_str>/create/path/', views.create_path),
-    path('project/<str:random_str>/upload/', views.upload_file),  #
-    path('project/<str:random_str>/download/', views.download_file),  #
-    path('project/<str:random_str>/delete/file/', views.delete_file),
-    path('project/<str:random_str>/remove/path/', views.rename_path),
-    path('project/<str:random_str>/rename/file/', views.rename_file),
-    path('project/<str:random_str>/rename/path/', views.rename_path),
+    path('project/<str:random_str>/create/file/', file_operation.create_file),
+    path('project/<str:random_str>/create/path/', file_operation.create_path),
+    path('project/<str:random_str>/upload/', file_operation.upload_file),
+    path('project/<str:random_str>/download/', file_operation.download_file),  #
+    path('project/<str:random_str>/delete/file/', file_operation.delete_file),
+    path('project/<str:random_str>/remove/path/', file_operation.rename_path),
+    path('project/<str:random_str>/rename/file/', file_operation.rename_file),
+    path('project/<str:random_str>/rename/path/', file_operation.rename_path),
     path('project/<str:random_str>/users/current/', views.get_current_users),  #
     path('project/<str:random_str>/<str:filename>/versions/compare/', views.compare_versions),
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
