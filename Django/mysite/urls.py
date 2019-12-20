@@ -34,8 +34,9 @@ urlpatterns = [
     path('project/<str:random_str>/create/file/', file_operation.create_file),
     path('project/<str:random_str>/create/path/', file_operation.create_path),
     path('project/<str:random_str>/upload/', file_operation.upload_file),
-    path('project/<str:random_str>/download/', file_operation.download_file),  #
+    path('project/<str:random_str>/download/', file_operation.download_file),
     path('project/<str:random_str>/delete/file/', file_operation.delete_file),
+    path('project/<str:random_str>/compile/', file_operation.compile_pdf),
     path('project/<str:random_str>/remove/path/', file_operation.rename_path),
     path('project/<str:random_str>/rename/file/', file_operation.rename_file),
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),

@@ -1,5 +1,7 @@
 from django.http import HttpResponse, FileResponse
 from SUSTex.models import User, Project, UserProject, Document
+import subprocess
+import json
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -105,21 +107,6 @@ def upload_file(request, random_str):
     return HttpResponse('Filepath not exist')
 
 
-def download_file(request, random_str):
-    filename = request.get['filename']
-    path = request.GET['path']
-    verify = file_manage_verify(request, random_str)
-    if verify:
-        return verify
-    filepath = os.path.join(USER_FILES_DIR, random_str)
-    filepath = os.path.join(filepath, path)
-    filepath = os.path.join(filepath, filename)
-    if os.path.isfile(filepath):
-        f = os.open(filepath, 'rb')
-
-    return HttpResponse('File not exist')
-
-
 def rename_file(request, random_str):
     filename = request.GET['filename']
     path = request.GET['path']
@@ -148,3 +135,62 @@ def rename_path(request, random_str):
         os.rename(old_path, new_path)
         return HttpResponse("Rename Successfully")
     return HttpResponse('This path does not exist')
+
+
+def download_file(request, random_str):
+    filename = request.GET['file']
+    path = request.GET['path']
+    verify = file_manage_verify(request, random_str)
+    if verify:
+        return verify
+    filepath = os.path.join(USER_FILES_DIR, random_str)
+    filepath = os.path.join(filepath, path)
+    filepath = os.path.join(filepath, filename)
+    if os.path.isfile(filepath):
+        f = open(filepath, 'rb')
+        response = FileResponse(f)
+        response['Content-Type'] = 'application/octect-stream'
+        response['Content-Disposition'] = 'attachment;filename="%s"' % filename
+        return response
+    return HttpResponse('File not exist')
+
+
+def compile_pdf(request, random_str):
+    document = request.GET['document']
+    path = request.GET['path']
+    verify = file_manage_verify(request, random_str)
+    if verify:
+        return verify
+    lst = document.split('.')
+    filename = lst[0]
+    postfix = lst[1]
+    response = Document.objects.filter(filename=filename)
+    if response.count() == 0:
+        return HttpResponse('LaTex Document does not exist')
+    doc = response[0]
+    if postfix != 'tex' or doc.project.type != 'LaTex':
+        return HttpResponse('Not a LaTex document!')
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    folder_path = os.path.join(project_path, path)
+    filepath = os.path.join(folder_path, document)
+    if os.path.isfile(filepath):
+        try:
+            cmd = ['pdflatex', '-quiet', filepath, '-aux-directory=%s' % os.path.join(project_path, 'log')]
+            print(cmd)
+            p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            content = p.stdout.read().decode('utf8')
+            lines = content.split('\r\n')
+        except Exception:
+            return HttpResponse('Compile fail')
+        errors = []
+        for line in lines:
+            if line == '':
+                pass
+            else:
+                errors.append(line[line.rfind('/') + 1:])
+                return HttpResponse(json.dumps(line[line.rfind('/') + 1:]))
+        pdf_path = os.path.join(project_path, filename + '.pdf')
+        response = FileResponse(pdf_path)
+        response['Content-Type'] = 'application/pdf'
+        return response
+    return HttpResponse('LaTex Document does not exist')

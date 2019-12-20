@@ -156,6 +156,7 @@ class Document(models.Model):
     version = models.IntegerField(default=0)
     last_modify = models.DateTimeField(auto_now=True)
     content = models.TextField(default='')
+    path = models.CharField(max_length=200, null=False, default='')
 
     def __str__(self):
         data = {'id': self.id, 'project': self.project.random_str, 'version': self.version}
