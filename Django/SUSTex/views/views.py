@@ -3,6 +3,8 @@ from django.contrib import auth
 from django.http import HttpResponse
 from SUSTex.models import User, Project, Document, UserProject, Authorization
 from Utils.diff_match_patch import diff_match_patch
+from django.shortcuts import render
+from django.urls import reverse
 import json
 
 
@@ -193,3 +195,14 @@ def edit_doc(request, random_str, filename):
     print(response[0].version)
     print(response[1].version)
     return HttpResponse('Edit File')
+
+
+def index(request, document_id=None):
+    # base_url = '%s://%s%s' % (
+    #     'https' if request.is_secure() else 'http',
+    #     request.META.get('HTTP_HOST') or 'localhost',
+    #     reverse('index-default'))
+    context = {}
+    resp = render(request, 'new_index.html', context)
+    resp['Cache-Control'] = 'no-store, must-revalidate'
+    return resp

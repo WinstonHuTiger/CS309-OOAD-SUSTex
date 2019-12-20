@@ -1,0 +1,151 @@
+{% load staticfiles %}
+<html>
+
+<head>
+    <link rel="stylesheet" href="{% static 'codemirror.css' %}"/>
+    <script src="{% static 'jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'codemirror.js' %}"></script>
+    <script src="{% static 'ot.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js">
+    </script>
+    <script>
+        var documentId = '{{ document_id|escapejs }}';
+        var cm = null;
+        var currentVersion = null;
+        var needVersion = null;
+        var pendingOp = null;
+        var sending = false;
+        var sendingOp = null;
+        var sendingReqId = null;
+        var pendingRemoteChanges = [];
+        var ignoreLocalChanges = false;
+        var streamTimeoutTimer = null;
+        var recv_ = false;
+        var documentInitialContent = '{{ document_content|escapejs }}';
+        var documentInitialVersion = '{{ document_version }}';
+        console.log(window.location);
+        var wsStart = "ws://";
+        loc = window.location;
+        console.log(loc);
+        if (loc.protocol == "https:") {
+            wsStart = "wss://";
+        }
+        var endpoint = wsStart + loc.host + loc.pathname;
+        let socket = new WebSocket(endpoint);
+        var makeId = function () {
+            var out = '';
+            var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            for (var i = 0; i < 16; ++i) {
+                out += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return out;
+        };
+        socket.onmessage = function (e) {
+            console.log("message", e);
+            var operation = JSON.parse(e.data);
+            console.log("operation", operation);
+            applyRemoteChange(operation);
+        };
+        var interval = setInterval(function send_(){
+        if ( pendingOp != null){
+            sendingOp = pendingOp;
+            sendingReqId = makeId();
+            pendingOp = null;
+            final_data =  {
+                'request-id': sendingReqId,
+                'parent-version': currentVersion,
+               'op': sendingOp.ops,
+            };
+            socket.send(JSON.stringify(final_data));
+            needVersion = (parseInt(currentVersion) + 1);
+            currentVersion = (parseInt(currentVersion) + 1);
+        }
+        }, 550);
+        socket.onopen = function (e) {
+            console.log("open", e);
+        }
+        socket.onerror = function (e) {
+            console.log("error", e);
+        };
+        socket.onclose = function (e) {
+            console.log("close", e);
+        };
+        var applyRemoteChange = function (change) {
+            var op = ot.TextOperation.fromJSON(change.op);
+            console.log("change", change);
+            var fromSelf = (needVersion != null && change.version == needVersion);
+            var logMsg = 'remote change: ' + change.version + ' ' + JSON.stringify(op.ops);
+            if (fromSelf) {
+                logMsg += ' (ignoring)';
+            }
+            console.log(logMsg);
+            if (!fromSelf) {
+                if (sendingOp) {
+                    console.log('transforming with sendingOp: ' + JSON.stringify(sendingOp.ops));
+                    var result = ot.TextOperation.transform(op, sendingOp);
+                    op = result[0];
+                    sendingOp = result[1]; // we won't send this again
+                }
+                if (pendingOp) {
+                    console.log('transforming with pendingOp: ' + JSON.stringify(pendingOp.ops));
+                    var result = ot.TextOperation.transform(op, pendingOp);
+                    op = result[0];
+                    pendingOp = result[1];
+                }
+                ignoreLocalChanges = true;
+                var pos = 0;
+                for (var i = 0; i < op.ops.length; ++i) {
+                    var subop = op.ops[i];
+                    if (ot.TextOperation.isRetain(subop)) {
+                        pos += subop;
+                    } else if (ot.TextOperation.isInsert(subop)) {
+                        cm.replaceRange(subop, cm.posFromIndex(pos));
+                        pos += subop.length;
+                    } else if (ot.TextOperation.isDelete(subop)) {
+                        cm.replaceRange('', cm.posFromIndex(pos), cm.posFromIndex(pos - subop));
+                    }
+                }
+                ignoreLocalChanges = false;
+            }
+            currentVersion = change.version;
+            if (needVersion != null && currentVersion >= needVersion) {
+                console.log("new currentVersion", currentVersion);
+                needVersion = null;
+                sendingOp = null;
+            }
+        };
+        $(document).ready(function () {
+            $('#input').attr('disabled', true);
+            cm = CodeMirror.fromTextArea($('#content').get(0), {
+                lineNumbers: true,
+                lineWrapping: true
+            });
+            cm.setValue(documentInitialContent);
+            currentVersion = documentInitialVersion;
+            cm.on('changes', function (cm, changes) {
+                if (ignoreLocalChanges) {
+                    return;
+                }
+                var operation = ot.CodeMirrorAdapter.operationFromCodeMirrorChanges(changes, cm)[0];
+                console.log('local change: ' + JSON.stringify(operation.ops));
+                if (pendingOp) {
+                    pendingOp = pendingOp.compose(operation);
+                } else {
+                    pendingOp = operation;
+                }
+                console.log(pendingOp);
+            });
+            $('#input').removeAttr('disabled');
+        });
+    </script>
+</head>
+
+<body>
+<h1>{{ document_id }}</h1>
+<div id="input">
+    <textarea id="content"></textarea>
+</div>
+<p>Start another document by browsing to <code>{{ base_url }}/{any-string}</code> .</p>
+</body>
+
+</html>

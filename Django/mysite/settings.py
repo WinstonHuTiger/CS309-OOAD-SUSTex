@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'SUSTex',
+    "channels",  # <--
 ]
 
 MIDDLEWARE = [
@@ -47,12 +48,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# websocket config
+ROOT_URLCONF = 'mysite.urls'
+ASGI_APPLICATION = 'mysite.routing.application'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
+
 ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,8 +132,10 @@ TIME_ZONE = 'Asia/Shanghai'  # <--
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
-# <---
+STATICFILES_DIRS = (
+    os.path.join(os.path.join(BASE_DIR, 'static')),
+)
+# <--
 SESSION_COOKIE_AGE = 60*30
 SESSION_COOKIE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
