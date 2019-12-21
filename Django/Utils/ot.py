@@ -150,8 +150,8 @@ class TextOperation(object):
 
         i = 0
         parts = []
-
         for op in self:
+            print("LEN")
             if _is_retain(op):
                 if i + op > len(doc):
                     raise Exception("Cannot apply operation: operation is too long.")

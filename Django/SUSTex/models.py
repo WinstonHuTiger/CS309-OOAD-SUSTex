@@ -182,3 +182,26 @@ class Authorization(models.Model):
         data = {"id": self.id, "user": self.user.id, "code": self.code, "authority": self.authority,
                 "date": str(self.date)}
         return get_json(data)
+
+
+class DocumentChange(models.Model):
+    document = models.ForeignKey('Document', on_delete=models.CASCADE)
+    version = models.IntegerField(default=0, db_index=True)
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    time = models.DateTimeField(auto_now_add=True, db_index=True)
+    parent_version = models.IntegerField(default=0)
+    data = models.TextField()
+
+    class Meta:
+        unique_together = (
+            ('document', 'version'),
+            ('document', 'user', 'parent_version'),
+        )
+
+    def get_dict(self):
+        out = {
+            'version': self.version,
+            'time': self.time.isoformat(),
+            'op': json.loads(self.data)
+        }
+        return out

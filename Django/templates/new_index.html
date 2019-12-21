@@ -17,8 +17,8 @@
         var sendingOp = null;
         var sendingReqId = null;
         var ignoreLocalChanges = false;
-        var documentInitialContent = '{{ document_content|escapejs }}';
-        var documentInitialVersion = '{{ document_version }}';
+        var documentInitialContent = '{{ document }}';
+        var documentInitialVersion = '{{ version }}';
         console.log(window.location);
         var wsStart = "ws://";
         loc = window.location;
@@ -50,7 +50,7 @@
             final_data =  {
                 'request-id': sendingReqId,
                 'parent-version': currentVersion,
-               'op': sendingOp.ops,
+                'op': sendingOp.ops,
             };
             socket.send(JSON.stringify(final_data));
             needVersion = (parseInt(currentVersion) + 1);
@@ -67,8 +67,8 @@
             console.log("close", e);
         };
         var applyRemoteChange = function (change) {
+            change = JSON.parse(change['text'])
             var op = ot.TextOperation.fromJSON(change.op);
-            console.log("change", change);
             var fromSelf = (needVersion != null && change.version == needVersion);
             var logMsg = 'remote change: ' + change.version + ' ' + JSON.stringify(op.ops);
             if (fromSelf) {

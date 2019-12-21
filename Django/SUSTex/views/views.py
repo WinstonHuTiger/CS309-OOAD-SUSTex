@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.http import HttpResponse
-from SUSTex.models import User, Project, Document, UserProject, Authorization
+from SUSTex.models import User, Project, Document, UserProject, Authorization, DocumentChange
 from Utils.diff_match_patch import diff_match_patch
 from django.shortcuts import render
 from django.urls import reverse
@@ -198,6 +198,12 @@ def edit_doc(request, random_str, filename):
 
 
 def editor(request):
-    context = {}
+    project = Project.objects.get(random_str='taeVJySpBUjKdl5OYAHEbgxcLDw8mf')
+    document = Document.objects.get(project=project)
+    context = {
+        'document': document.content,
+        'version': document.version
+    }
+    # document_change = DocumentChange.objects.filter(document=document).order_by('-control_version')
     resp = render(request, 'new_index.html', context)
     return resp
