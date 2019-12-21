@@ -1,62 +1,70 @@
-from channels.consumer import AsyncConsumer
-from channels.db import database_sync_to_async
-from SUSTex.models import Document
+from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from Utils.ot import TextOperation
+import json
 
 
-# def get_document(eid):
-#
-#     return doc
-
-
-class DocumentChange(AsyncConsumer):
-    async def websocket_connect(self, event):
-        print("connected", event)
-        await self.send({
-            "type": "websocket.accept"
-        })
-        document_id = self.scope['url_route']['kwargs']['document_id']
-        # self.doc_id = f"document_{document_id}"
-        self.doc_id = "1"
+class AsyncConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.random_str = self.scope['url_route']['kwargs']['random_str']
         await self.channel_layer.group_add(
-            self.doc_id,
+            self.random_str,
+            self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.random_str,
             self.channel_name
         )
 
+    # # Receive message from WebSocket
+    # async def receive(self, text_data=None, bytes_data=None):
+    #     text_data_json = json.loads(text_data)
+    #     message = text_data_json['message']
+    #
+    #     # 信息群发
+    #     await self.channel_layer.group_send(
+    #         self.room_group_name,
+    #         {
+    #             'type': 'system_message',
+    #             'message': message
+    #         }
+    #     )
+
     async def websocket_receive(self, event):
         print("receive", event)
-        # front_text = event.get("text", None)
-        #
-        # if front_text is not None:
-        #     front_text = eval(front_text)
-        #     document_id = self.scope['url_route']['kwargs']['document_id']
-        #     print("document_id", document_id)
-        #     # doc = await self._doc_get_or_create(document_id)
-        #     opdata = front_text['op']
-        #     for i in opdata:
-        #         if not isinstance(i, int) and not isinstance(i, str):
-        #             await self.channel_layer.group_send(
-        #                 self.doc_id,
-        #                 {
-        #                     "type": "doc_operation",
-        #                     "text": "invalid data"
-        #                 })
-        #     op = TextOperation(opdata)
-        #     request_id = front_text['request-id']
-        #     parent_version = front_text['parent-version']
-        #
-        #     final_msg = await self.return_current_doc(document_id, request_id, parent_version, op)
-        #     await self.channel_layer.group_send(
-        #         self.doc_id,
-        #         {
-        #             "type": "doc_operation",
-        #             "text": json.dumps(final_msg)
-        #         })
-        await self.channel_layer.group_send(
-            self.doc_id,
-            {
-                "type": "doc_operation",
-                "text": "receive"
-            })
+        front_text = event.get("text", None)
+
+        if front_text is not None:
+            front_text = eval(front_text)
+            random_str = self.scope['url_route']['kwargs']['random_str']
+            print("random_str", random_str)
+            # doc = await self._doc_get_or_create(document_id)
+            opdata = front_text['op']
+            for i in opdata:
+                if not isinstance(i, int) and not isinstance(i, str):
+                    await self.channel_layer.group_send(
+                        self.doc_id,
+                        {
+                            "type": "doc_operation",
+                            "text": "invalid data"
+                        })
+            print(opdata)
+            op = TextOperation(opdata)
+            request_id = front_text['request-id']
+            parent_version = front_text['parent-version']
+
+            # final_msg = await self.return_current_doc(random_str, request_id, parent_version, op)
+            await self.channel_layer.group_send(
+                self.random_str,
+                {
+                    "type": "doc_operation",
+                    "text": json.dumps({"version": 123,})
+                })
+            print(json.dumps({'version': '2131'}))
 
     async def doc_operation(self, event):
         print("doc operation", event)
@@ -65,79 +73,31 @@ class DocumentChange(AsyncConsumer):
             "text": event['text']
         })
 
-    async def websocket_disconnect(self, event):
-        print("disconnect", event)
+    # Receive message from room group
+    async def system_message(self, event):
+        print(event)
+        message = event['message']
 
-    @database_sync_to_async
-    def _doc_get_or_create(self, eid):
-        doc = self.get_document(eid)
-        return doc
-    #
-    # @database_sync_to_async
-    # def return_current_doc(self, document_id, request_id, parent_version, op):
-    #     print("new operation is", op.ops)
-    #     saved = False
-    #     eid = document_id
-    #     with transaction.atomic():
-    #
-    #         doc = self.get_document(eid)
-            # try:
-            #     # already submitted?
-            #     c = DocumentChange.objects.get(
-            #         document=doc,
-            #         request_id=request_id,
-            #         parent_version=parent_version)
-            # except DocumentChange.DoesNotExist:
-            #
-            #     changes_since = DocumentChange.objects.filter(
-            #         document=doc,
-            #         version__gt=parent_version,
-            #         version__lte=doc.version).order_by('version')
-            #
-            #     for c in changes_since:
-            #
-            #         op2 = TextOperation(json.loads(c.data))
-            #         print("after json", json.loads(c.data))
-            #         try:
-            #             op, _ = TextOperation.transform(op, op2)
-            #         except:
-            #             return ('unable to transform against version %d' % c.version)
-            #
-            # try:
-            #     doc.content = op(doc.content)
-            # except:
-            #     return {
-            #         "version": doc.version,
-            #         "unable to apply": op.ops,
-            #     }
+        # Send message to WebSocket单发消息
+        await self.send(text_data=json.dumps({
+            'message': message
+        }))
 
-    #         next_version = doc.version + 1
-    #         print("saved version", next_version)
-    #         c = DocumentChange(
-    #             document=doc,
-    #             version=next_version,
-    #             request_id=request_id,
-    #             parent_version=parent_version,
-    #             data=json.dumps(op.ops))
-    #         print(op.ops)
-    #         c.save()
-    #         doc.version = next_version
-    #         doc.save()
-    #         saved = True
-    # if saved:
-    #     event = c.export()
-    #     return event
-    #
-    #     return {'version': c.version}
-
-    def get_document(self, eid):
-        # project_id = eid.split("_")[0]
-        # file_name = eid.split("_")[-1]
-        doc = Document.objects.get(id=1)
-        # try:
-        #     docs = Document.objects.filter(project_file=proj_.get_project_files_by_name(file_name)).order_by('-control_version')
-        #     doc = [d for d in docs][0]
-        # except:
-        #     doc = Document(project_file=proj_.get_project_files_by_name(file_name))
-        #     doc.save()
-        return doc
+def send_group_msg(room_name, message):
+    # 从Channels的外部发送消息给Channel
+    """
+    from assets import consumers
+    consumers.send_group_msg('ITNest', {'content': '这台机器硬盘故障了', 'level': 1})
+    consumers.send_group_msg('ITNest', {'content': '正在安装系统', 'level': 2})
+    :param room_name:
+    :param message:
+    :return:
+    """
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        'notice_{}'.format(room_name),  # 构造Channels组名称
+        {
+            "type": "system_message",
+            "message": message,
+        }
+    )

@@ -4,7 +4,7 @@ import subprocess
 import json
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
 USER_FILES_DIR = os.path.join(BASE_DIR, 'UserData/Projects/')
 ALLOWED_POSTFIX = ['tex', 'bib', 'txt', 'md']
 
@@ -47,6 +47,7 @@ def create_file(request, random_str):
 
 
 def create_path(request, random_str):
+    print(BASE_DIR)
     path = request.GET['path'].split('/')
     verify = file_manage_verify(request, random_str)
     if verify is not None:

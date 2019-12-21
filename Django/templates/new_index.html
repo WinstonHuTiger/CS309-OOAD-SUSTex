@@ -9,7 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js">
     </script>
     <script>
-        var documentId = '{{ document_id|escapejs }}';
         var cm = null;
         var currentVersion = null;
         var needVersion = null;
@@ -17,10 +16,7 @@
         var sending = false;
         var sendingOp = null;
         var sendingReqId = null;
-        var pendingRemoteChanges = [];
         var ignoreLocalChanges = false;
-        var streamTimeoutTimer = null;
-        var recv_ = false;
         var documentInitialContent = '{{ document_content|escapejs }}';
         var documentInitialVersion = '{{ document_version }}';
         console.log(window.location);
@@ -30,7 +26,7 @@
         if (loc.protocol == "https:") {
             wsStart = "wss://";
         }
-        var endpoint = wsStart + loc.host + loc.pathname;
+        var endpoint = wsStart + loc.host + "/project/1224/";
         let socket = new WebSocket(endpoint);
         var makeId = function () {
             var out = '';

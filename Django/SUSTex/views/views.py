@@ -197,12 +197,7 @@ def edit_doc(request, random_str, filename):
     return HttpResponse('Edit File')
 
 
-def index(request, document_id=None):
-    # base_url = '%s://%s%s' % (
-    #     'https' if request.is_secure() else 'http',
-    #     request.META.get('HTTP_HOST') or 'localhost',
-    #     reverse('index-default'))
+def editor(request):
     context = {}
     resp = render(request, 'new_index.html', context)
-    resp['Cache-Control'] = 'no-store, must-revalidate'
     return resp

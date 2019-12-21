@@ -49,6 +49,7 @@ MIDDLEWARE = [
 ]
 
 # websocket config
+# https://github.com/MSOpenTech/redis/releases
 ROOT_URLCONF = 'mysite.urls'
 ASGI_APPLICATION = 'mysite.routing.application'
 CHANNEL_LAYERS = {

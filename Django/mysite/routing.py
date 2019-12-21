@@ -1,20 +1,12 @@
-from django.conf.urls import url
-
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from channels.security.websocket import AllowedHostsOriginValidator, OriginValidator
-from SUSTex.views.consumers import DocumentChange
+from channels.sessions import SessionMiddlewareStack
+import SUSTex.routing
+
 application = ProtocolTypeRouter({
-
-    # WebSocket chat handler
-    "websocket": AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter([
-                url(r'^file_edit/$', DocumentChange),
-                url(r'^file_edit/(?P<document_id>[^/]+)$', DocumentChange),
-            ])
-        ))
-
-    # Using the third-party project frequensgi, which provides an APRS protocol
-
+    'websocket': SessionMiddlewareStack(
+        URLRouter(
+            SUSTex.routing.websocket_urlpatterns
+        )
+    ),
 })
