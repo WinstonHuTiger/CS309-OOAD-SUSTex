@@ -2,7 +2,7 @@ import React from 'react';
 import { Layout, message } from 'antd';
 import axios from 'axios';
 import NProgress from '../tools/nprogress';
-import ProjectPageHeader from './ProjectPage/ProjectPageHeader';
+import Header from './Header';
 import ProjectPageFileManagement from './ProjectPage/ProjectPageFileManagement';
 import ProjectPageMainContent from './ProjectPage/ProjectPageMainContent';
 
@@ -21,7 +21,9 @@ class ProjectPage extends React.Component {
     const _this = this;
     startTime = new Date();
     console.log("GET" + window.url + '/user/');
-    axios.get(window.url + '/user/')
+    axios.get(window.url + '/user/',
+    {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
+    )
     .then(function (response) {
       console.log(response)
       message.success('Login Successfully!')
@@ -39,6 +41,7 @@ class ProjectPage extends React.Component {
   }
 
   componentDidMount() {
+    console.log(this.props.match.params)
     let endTime = new Date();
     let timeInterval = endTime.getTime() - startTime.getTime();
     if (timeInterval <= 500){
@@ -59,7 +62,7 @@ class ProjectPage extends React.Component {
   render() {
     return (
       <Layout>
-          <ProjectPageHeader />
+          <Header page="project"/>
         <Layout
           style={{
             marginTop: "64px"

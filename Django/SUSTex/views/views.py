@@ -3,6 +3,7 @@ from django.contrib import auth
 from django.http import HttpResponse
 from SUSTex.models import User, Project, Document, UserProject, Authorization, DocumentChange
 from Utils.diff_match_patch import diff_match_patch
+from django.contrib.auth import SESSION_KEY
 from django.shortcuts import render
 from django.urls import reverse
 import json
