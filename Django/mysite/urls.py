@@ -30,6 +30,7 @@ urlpatterns = [
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
     path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),  #
     path('project/<str:random_str>/create/document/', views.create_doc),
+    path('project/<str:random_str>/document/', views.get_doc_info),
     path('project/<str:random_str>/', views.get_project_info),
     path('project/<str:random_str>/create/file/', file_operation.create_file),
     path('project/<str:random_str>/create/path/', file_operation.create_path),
@@ -45,5 +46,4 @@ urlpatterns = [
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
     path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
     path('project/<str:random_str>/rename/', views.rename_project),
-    path('editor/', views.editor),
 ]

@@ -46,7 +46,7 @@ class User(AbstractUser):
     id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=50, null=True, unique=True)
     password = models.CharField(max_length=50, null=True)
-    github_id = models.IntegerField(null=True)
+    github_id = models.IntegerField(null=True, db_index=True)
     alias = models.CharField(max_length=20, null=False)
     avatar_url = models.CharField(max_length=500, null=True)
 
@@ -60,7 +60,6 @@ class Project(models.Model):
     id = models.AutoField(primary_key=True)
     random_str = models.CharField(max_length=30, null=False, default='####################', unique=True)
     name = models.CharField(max_length=50, null=True)
-    type = models.CharField(max_length=4, default='latex', null=False)
     last_modify = models.DateTimeField(auto_now=True)
 
     def generate_random_str(self):
@@ -69,7 +68,7 @@ class Project(models.Model):
             self.generate_random_str()
 
     def __str__(self):
-        data = {'id': self.id, 'random_str': self.random_str, 'name': self.name, 'type':self.type,
+        data = {'id': self.id, 'random_str': self.random_str, 'name': self.name,
                 "last_modify": str(self.last_modify)}
         return get_json(data)
 
@@ -85,19 +84,16 @@ class Project(models.Model):
 
     def create_document(self, filename=None):
         if filename is None:
-            filename = 'main'
+            filename = 'main.tex'
         query_doc = Document.objects.filter(project_id=self.id, filename=filename)
         versions = query_doc.count()
         if versions != 0:
             raise RuntimeError('Document already created!')
-        document = Document(project=self, filename=filename, version=1)
+        document = Document(project=self, filename=filename)
         document.project = self
         document.save()
         path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
-        if self.type == 'LaTex':
-            f = open(os.path.join(path, '%s.tex' % filename), 'w+')
-        else:
-            f = open(os.path.join(path, '%s.md' % filename), 'w+')
+        f = open(os.path.join(path, filename), 'w+')
         f.close()
 
     def create_version(self, filename=None):
@@ -153,7 +149,8 @@ class Document(models.Model):
     id = models.AutoField(primary_key=True)
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     filename = models.CharField(max_length=50, null=False)
-    version = models.IntegerField(default=0)
+    version = models.IntegerField(default=0, db_index=True)
+    wb_version = models.IntegerField(default=0, db_index=True)
     last_modify = models.DateTimeField(auto_now=True)
     content = models.TextField(default='')
     path = models.CharField(max_length=200, null=False, default='')
@@ -164,6 +161,9 @@ class Document(models.Model):
 
     def get_dict(self):
         return {"project": self.project.random_str, "version": self.version, "last_modify": str(self.last_modify)}
+
+    class Meta:
+        unique_together = ('project', 'filename')
 
 
 class Authorization(models.Model):
@@ -189,7 +189,7 @@ class DocumentChange(models.Model):
     version = models.IntegerField(default=0, db_index=True)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True, db_index=True)
-    parent_version = models.IntegerField(default=0)
+    parent_version = models.IntegerField(default=0, db_index=True)
     data = models.TextField()
 
     class Meta:

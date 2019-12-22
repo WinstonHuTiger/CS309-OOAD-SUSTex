@@ -54,6 +54,7 @@ class MainContent extends Component {
       },
       showRightButton: false,
       currentWidth: document.body.clientWidth * 0.5 - 10,
+      render: this.props == "markdown" ? "markdown-render" : "pdf-viewer",
     }
   }
 
@@ -125,6 +126,7 @@ class MainContent extends Component {
                     },
                 }}
                 onResize={(e, dir, refToElement, delta) => {
+                  console.log(this.state.render)
                   if (this.state.resize != null) {
                     this.setState({
                       resizeSize: null
@@ -242,8 +244,8 @@ class MainContent extends Component {
               {this.state.max?
                 (<div style={{
                   position: 'absolute',
-                  height: document.getElementById("render").getClientRects()[0].height,
-                  width: document.getElementById("render").getClientRects()[0].width,
+                  height: document.getElementById(this.state.render).getClientRects()[0].height,
+                  width: document.getElementById(this.state.render).getClientRects()[0].width,
                   top: 0,
                   right: 0,
                   zIndex: 999,
@@ -262,7 +264,7 @@ class MainContent extends Component {
                  </div>):(null)}
               {this.props.mode == "markdown" ? (
                 <MarkdownRender
-                  id="render"
+                  id="markdown-render"
                   className="markdown"
                   blur={this.state.max}
                   source={this.state.value}
@@ -271,11 +273,15 @@ class MainContent extends Component {
                   showButton={this.state.showRightButton}
                 />
               ) : (
-                <iframe
-                  className="pdf-render"
-                  src="/pdfjs-2.2.228-dist/web/viewer.html?file=https://arxiv.org/pdf/1704.04861.pdf"
-                  width={this.state.currentWidth}
-                  />
+                <div class="iframe-container">
+                  <iframe
+                    id="pdf-viewer"
+                    className={this.state.max?"pdf-render blur":"pdf-render"}
+                    src="/pdfjs-2.2.228-dist/web/viewer.html?file=https://arxiv.org/pdf/1704.04861.pdf"
+                    allowfullscreen
+                    // width={this.state.currentWidth}
+                    />
+                </div>
               )}
           </Col>
         </Row>

@@ -28,11 +28,11 @@ class Header extends Component {
     <header style={headerStyle}>
       <Row>
         <Col span={6}>
-          <h2 style={logoStyle}>SUSTex</h2>
+          <h2 style={logoStyle} class='none-select'>SUSTex</h2>
         </Col>
         <Col span={6} push={12}>
           <Row type="flex" justify="end">
-            <Button style={githubButtonStyle}>
+            <Button style={githubButtonStyle} href= {window.url + "/login/github/"}>
               <Icon type="github" /> Login with Github
             </Button>
             <Col span={2} />

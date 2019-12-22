@@ -274,9 +274,5 @@ class LatexEditor extends Component {
     </>
   );
 }
-// <AutoComplete
-//   display={this.state.autoComplete}
-//   left={this.state.cursorLeft}
-//   top={this.state.cursorTop - 5}
-//   />
+
 export default LatexEditor;

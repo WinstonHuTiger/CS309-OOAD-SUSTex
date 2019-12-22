@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Layout, Menu, Button, Popover, Icon, Input } from 'antd';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Lightbox from 'react-lightbox-component';
+import ContextMenuItems from '../../components/ContextMenuItems';
 import '../css/lightbox.css';
 import '../css/custom.css';
 
@@ -45,6 +47,11 @@ const star_ocean = (
  }/>
 );
 
+const menuItemStyle = {
+  height: '20px',
+  lineHeight: '20px'
+}
+
 class FileManagement extends Component {
   constructor(props) {
     super(props);
@@ -53,7 +60,7 @@ class FileManagement extends Component {
       collapsed: true,
       modalIsOpen: true,
       changeMode: this.props.changeMode,
-      leftShow: false
+      leftShow: false,
     }
   }
 
@@ -96,13 +103,14 @@ class FileManagement extends Component {
         onCollapse={this.onCollapse}
         theme="light"
         collapsedWidth="0"
-        id="files"
+        width="230px"
         trigger={null}>
           <Menu theme="light"
           mode="inline"
           defaultOpenKeys={['/img']}
           defaultSelectedKeys={['/markdown.md']}
-          className="menu">
+          className="menu"
+          >
             <Button
               style={triggerStyle}
               className={
@@ -113,38 +121,43 @@ class FileManagement extends Component {
               icon={this.state.collapsed?"right":"left"}
               shape="circle"
               onClick={this.toggle}/>
-            <Search
-              placeholder="Search File"
-              onSearch={value => console.log(value)}
-              style={{ width: '180px', margin: '10px' }}
-            />
-            <SubMenu
-              key="/img"
-              title={
-                <span>
-                  <Icon type="folder" />
-                  <span>Img</span>
-                </span>
-              }
-            >
-              <Menu.Item key="/img/only_me.gif" style={{height: 'auto'}}>
-              <Popover content={only_me} style={{padding: '0'}}>
-                <Icon type="file-image" />only_me.gif
-              </Popover>
+              <Search
+                placeholder="Search File"
+                onSearch={value => console.log(value)}
+                style={{ width: '210px', margin: '10px', zIndex: 0 }}
+              />
+              <SubMenu
+                key="/img"
+                title={
+                  <span class="file">
+                    <Icon type="folder" />
+                    <span>Img</span>
+                  </span>
+                }
+              >
+                <Menu.Item key="/img/only_me.gif" className="file">
+                <Popover content={only_me} style={{padding: '0'}}>
+                  <Icon type="file-image" />only_me.gif
+                </Popover>
+                </Menu.Item>
+                <Menu.Item key="/img/star_ocean.gif" className="file">
+                <Popover content={star_ocean} style={{padding: '0'}}>
+                  <Icon type="file-image" />star_ocean.gif
+                </Popover>
+                </Menu.Item>
+              </SubMenu>
+              <Menu.Item key="/markdown.md" className="file" onClick={this.markdownFile}>
+                <Icon type="file-text" />markdown.md
               </Menu.Item>
-              <Menu.Item key="/img/star_ocean.gif" style={{height: 'auto'}}>
-              <Popover content={star_ocean} style={{padding: '0'}}>
-                <Icon type="file-image" />star_ocean.gif
-              </Popover>
+              <Menu.Item key="/latex.tex" className="file" onClick={this.latexFile}>
+              <ContextMenuTrigger id="file" attributes={{'info': 'file'}}>
+                <Icon type="file-text" />latex.tex
+              </ContextMenuTrigger>
               </Menu.Item>
-            </SubMenu>
-            <Menu.Item key="/markdown.md" className="file" onClick={this.markdownFile}>
-              <Icon type="file-text" />markdown.md
-            </Menu.Item>
-            <Menu.Item key="/latex.tex" className="file" onClick={this.latexFile}>
-              <Icon type="file-text" />latex.tex
-            </Menu.Item>
           </Menu>
+          <ContextMenu id="file" className="contextMenu">
+            <ContextMenuItems />
+          </ContextMenu>
         </Sider>
       );
   }

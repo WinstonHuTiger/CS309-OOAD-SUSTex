@@ -27,7 +27,7 @@ def create_project(request):
     if not request.user.is_authenticated:
         return HttpResponse('Not login yet, please login first.')
     user = User.objects.filter(id=request.user.id)[0]
-    project = Project(name=project_name, type='LaTex')
+    project = Project(name=project_name)
     project.generate_random_str()
     project.create_project_path()
     project.save()
@@ -197,13 +197,23 @@ def edit_doc(request, random_str, filename):
     return HttpResponse('Edit File')
 
 
-def editor(request):
-    project = Project.objects.get(random_str='taeVJySpBUjKdl5OYAHEbgxcLDw8mf')
-    document = Document.objects.get(project=project)
-    context = {
-        'document': document.content,
-        'version': document.version
+def get_doc_info(request, random_str):
+    filename = request.GET['filename']
+    if not request.user.is_authenticated:
+        return HttpResponse('Please login first')
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return HttpResponse('Project does not exist')
+    project = response[0]
+    response = Document.objects.filter(filename=filename, project=project).order_by('-version')
+    if response.count() == 0:
+        return HttpResponse('Document dose not exist')
+    document = response[0]
+    re = {
+        "filename": document.filename,
+        "last_modify": str(document.last_modify),
+        "content": document.content,
+        "version": document.version,
+        "wb_version": document.wb_version,
     }
-    # document_change = DocumentChange.objects.filter(document=document).order_by('-control_version')
-    resp = render(request, 'new_index.html', context)
-    return resp
+    return HttpResponse(json.dumps(re))

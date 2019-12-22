@@ -8,12 +8,13 @@ from django.views.decorators.csrf import csrf_protect
 LOGIN_SCOPE = 'read:user'
 GITHUB_CLIENT_ID = '7fef2786398de055aad1'
 GITHUB_CLIENT_SECRET = 'fd3779593cff4bb50ca16ea2815a4793ee539fca'
-REDIRECT_URI = "http://127.0.0.1:8000/login/github/complete"
+REDIRECT_URI = 'http://127.0.0.1:8000/login/github/complete'
 GET_USER_INFO_API_URL = 'https://api.github.com/user?access_token='
 LOGIN_API_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=%s' \
                 % (GITHUB_CLIENT_ID, REDIRECT_URI, LOGIN_SCOPE)
 TOKEN_API_URL = 'https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=' \
                 % (GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
+REDIRECT_FRONT_URL = 'http://127.0.0.1:3000/'
 
 
 def login(request):
@@ -40,4 +41,4 @@ def complete(request):
         print('already exist')
     auth.login(request, User.objects.get(github_id=github_id))
     request.session.set_expiry(0)
-    return HttpResponse('Login Successfully!')
+    return redirect(to=REDIRECT_FRONT_URL, permanent=False)
