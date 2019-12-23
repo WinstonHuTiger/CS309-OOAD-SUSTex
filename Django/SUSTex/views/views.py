@@ -26,55 +26,55 @@ def get_response(res_type, message=None):
     if res_type == ResponseType.SUCCESS:
         return HttpResponse(json.dumps({
             "type": "success",
-            "code": ResponseType.SUCCESS,
-            "message": message.__str__()
+            "code": ResponseType.SUCCESS.value,
+            "message": message
         }))
     elif res_type == ResponseType.NOT_AUTHENTICATED:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.NOT_AUTHENTICATED,
+            "code": ResponseType.NOT_AUTHENTICATED.value,
             "message": "Not login or invalid session."
         }))
-    elif res_type == ResponseType.PROJECT_NOT_FOUND:
+    elif res_type == ResponseType.PROJECT_NOT_FOUND.value:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.PROJECT_NOT_FOUND,
+            "code": ResponseType.PROJECT_NOT_FOUND.value,
             "message": "Project not found."
         }))
     elif res_type == ResponseType.NOT_IN_PROJECT:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.NOT_IN_PROJECT,
+            "code": ResponseType.NOT_IN_PROJECT.value,
             "message": "You haven't joined the project yet, please contact project's administrator."
         }))
     elif res_type == ResponseType.NO_AUTHORITY:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.NO_AUTHORITY,
+            "code": ResponseType.NO_AUTHORITY.value,
             "message": "You do not have permission to modify the file."
         }))
     elif res_type == ResponseType.INVALID_AUTHORITY_CODE:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.INVALID_AUTHORITY_CODE,
+            "code": ResponseType.INVALID_AUTHORITY_CODE.value,
             "message": "Authority code is invalid."
         }))
     elif res_type == ResponseType.ALREADY_IN_PROJECT:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.ALREADY_IN_PROJECT,
+            "code": ResponseType.ALREADY_IN_PROJECT.value,
             "message": "You are already in the project."
         }))
     elif res_type == ResponseType.DOCUMENT_NOT_FOUND:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.DOCUMENT_NOT_FOUND,
+            "code": ResponseType.DOCUMENT_NOT_FOUND.value,
             "message": "Document not found."
         }))
     elif res_type == ResponseType.VERSION_NOT_FOUND:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.VERSION_NOT_FOUND,
+            "code": ResponseType.VERSION_NOT_FOUND.value,
             "message": "Document version: %d not found." % message
         }))
 
@@ -89,8 +89,7 @@ def get_user_info(request):
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     user = User.objects.get(id=request.user.id)
-    print(request.session)
-    return HttpResponse(user)
+    return get_response(ResponseType.SUCCESS, user.get_dict())
 
 
 def create_project(request):
@@ -284,10 +283,14 @@ def get_doc_info(request, random_str):
 def get_latex_templates(request):
     path = os.path.join(BASE_DIR, 'static/LaTex')
     lst = []
+    idx = 0
+    c_idx = 0
     for i in os.listdir(path):
         temp_path = os.path.join(path, i)
+        c_idx += 1
         re = {
             'category': i,
+            'index': c_idx,
             'list': []
         }
         lst.append(re)
@@ -295,8 +298,10 @@ def get_latex_templates(request):
             tp = os.path.join(temp_path, j)
             tp = os.path.join(tp, 'reference.txt')
             f = open(tp, 'r')
+            idx += 1
             re['list'].append({
                 'title': j,
-                'reference': f.readlines()[0]
+                'reference': f.readlines()[0],
+                'index': idx
             })
-    return get_response(ResponseType.SUCCESS, json.dumps(lst))
+    return get_response(ResponseType.SUCCESS, lst)

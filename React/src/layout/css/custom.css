@@ -266,3 +266,26 @@ html, body {
   transition: opacity .3s ease;
   float: right;
 }
+
+.avatar {
+  position: relative;
+  right: -15px;
+  margin: 15px 0 15px 0;
+  margin-left: 15px;
+}
+
+.avatar-down {
+  position: relative;
+  transition: color .3s ease;
+  right: -20px;
+}
+
+.dropdown-li {
+  font-size: 15px;
+  padding: 7px 0 0 11px;
+  height: 35px;
+}
+
+.dropdown-menu {
+  width: 150px;
+}

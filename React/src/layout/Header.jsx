@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Row, Col, Button, Icon, Menu } from 'antd';
+import { Row, Col, Button, Icon, Menu, Avatar, Dropdown, message } from 'antd';
 import './css/custom.css';
 import { Link } from "react-router-dom"
+import axios from 'axios';
 
 
 const { SubMenu } = Menu;
@@ -26,6 +27,69 @@ const githubButtonStyle = {
   margin: '15px 0 15px 0',
   marginLeft: '10px'
 };
+
+class UserAvatar extends Component {
+  state = {
+    mouse: false
+  }
+  onMouseEnter = () => {
+    this.setState({
+      mouse: true
+    });
+  }
+
+  onMouseLeave = () => {
+    this.setState({
+      mouse: false
+    });
+  }
+
+  logout = () => {
+    const _this = this;
+    axios.get(window.url + '/logout/')
+    .then(function(msg) {
+      message.success("Logout out successfully!");
+      setTimeout(() => {
+        _this.props.history.push('/workbench/');
+      }, 300);
+    })
+    .catch(function(error) {
+      message.error(error);
+    });
+  }
+
+  render() {
+    console.log(this.props.userInfo);
+    return(
+      <>
+        {this.props.userInfo != null ? (
+          <Dropdown overlay={
+            <Menu className="dropdown-menu">
+                <li className="dropdown-li none-select">Hello, <b>{this.props.userInfo["alias"]}</b></li>
+                <Menu.Divider />
+                <Menu.Item onClick={this.logout}>Logout</Menu.Item>
+            </Menu>
+          }>
+            <div onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+              <Avatar className="avatar" shape="square" src={this.props.userInfo["avatar_url"]} />
+              <Icon type="down"
+              className="avatar-down"
+              style={this.state.mouse ? ({
+                color: "#1890ff"
+              }):(null)
+              }
+              />
+            </div>
+          </Dropdown>
+        ):(
+          <Button style={githubButtonStyle} href= {window.url + "/login/github/"}>
+            <Icon type="github" /> Login with Github
+          </Button>
+        )}
+      </>
+    );
+  }
+}
 
 class Header extends Component {
   constructor(props) {
@@ -63,9 +127,7 @@ class Header extends Component {
                 </Menu.Item>
               ) : (null)}
             </Menu>
-            <Button style={githubButtonStyle} href= {window.url + "/login/github/"}>
-              <Icon type="github" /> Login with Github
-            </Button>
+            <UserAvatar userInfo={this.props.userInfo} history={this.props.history}/>
             <Col span={1} />
           </Row>
         </Col>

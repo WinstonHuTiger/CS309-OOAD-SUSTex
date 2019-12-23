@@ -11,23 +11,15 @@ const { Title, Paragraph, Text } = Typography;
 const { SubMenu } = Menu;
 const { Meta } = Card;
 
-var category_idx = 0;
-var idx = 0;
-
 class LeftMenu extends Component {
   state = {
     index: 0
-  };
-
-  handleClick = (e) => {
-    console.log('click ', e);
   };
 
   render() {
     return (
       <Menu
         className="templates-left-menu"
-        onClick={this.handleClick}
         defaultSelectedKeys={['1']}
         defaultOpenKeys={['sub1']}
         mode="inline"
@@ -41,10 +33,10 @@ class LeftMenu extends Component {
           {
             this.props.data.map(function (item, index) {
             return (
-              <Menu.ItemGroup key={category_idx++} title={item["category"]}>
+              <Menu.ItemGroup key={item["index"]} title={item["category"]}>
               {item["list"].map(function (item_, index_) {
                 return (
-                  <Menu.Item key={idx++}>
+                  <Menu.Item key={item_["index"]}>
                     <Link to={"/templates#" + item_["title"]}>{item_["title"]}</Link>
                   </Menu.Item>
                 );
@@ -165,7 +157,6 @@ class Template extends Component {
             reference={item["reference"]}/>
         </Col>
     );
-    console.log(cards)
     return(
       <>
         <h2 id={this.state.category}>
@@ -203,9 +194,11 @@ class Content extends Component {
 class TemplatesPage extends Component {
   constructor(props) {
     super(props);
-    console.log(props.match)
     this.state = {
       data: [],
+      length: 0,
+      categorys: 0,
+      userInfo: null,
     }
   }
 
@@ -214,26 +207,44 @@ class TemplatesPage extends Component {
     axios.get(window.url + '/templates/latex/')
     .then(function(msg) {
       var i;
-      var arr = msg.data;
-      for(i = 0; i < arr.length; i++) {
-        if (arr[i]["category"] == "Other") {
-          arr[i] = arr.splice(msg.data.length - 1, 1, arr[i])[0];
+      if (msg.data["code"] == 1) {
+        var arr = msg.data["message"];
+        for(i = 0; i < arr.length; i++) {
+          if (arr[i]["category"] == "Other") {
+            arr[i] = arr.splice(arr.length - 1, 1, arr[i])[0];
+            break;
+          }
         }
+        _this.setState({
+          data: msg.data["message"]
+        });
+
+      } else {
+          message.error('Error code: ' + msg.data["code"] + ', ' + msg.data["message"])
       }
-      _this.setState({
-        data: msg.data
-      });
-      console.log("")
     })
     .catch(function(error) {
       console.log(error)
     })
+    axios.get(window.url + '/user/')
+    .then(function(msg) {
+      if (msg.data["code"] == 1) {
+        _this.setState({
+          userInfo: msg.data["message"]
+        })
+      } else if (msg.data["code"] == 2) {
+        message.warning('Please Login First');
+      }
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
   }
 
   render() {
     return(
       <Layout>
-        <Header page='templates'/>
+        <Header page='templates' userInfo={this.state.userInfo} history={this.props.history}/>
         <Layout>
           <Row style={{marginTop: "64px"}}>
             <Col span={4}>

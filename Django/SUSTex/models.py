@@ -51,9 +51,12 @@ class User(AbstractUser):
     avatar_url = models.CharField(max_length=500, null=True)
 
     def __str__(self):
+        return get_json(self.get_dict())
+
+    def get_dict(self):
         data = {'id': self.id, 'alias': self.alias, 'username': self.username, 'password': self.password,
                 'github_id': self.github_id, 'avatar_url': self.avatar_url}
-        return get_json(data)
+        return data
 
 
 class Project(models.Model):
