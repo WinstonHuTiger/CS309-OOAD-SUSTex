@@ -3,11 +3,10 @@ from django.contrib import auth
 from django.http import HttpResponse
 from SUSTex.models import User, Project, Document, UserProject, Authorization, DocumentChange
 from Utils.diff_match_patch import diff_match_patch
-from django.contrib.auth import SESSION_KEY
-from django.shortcuts import render
-from django.urls import reverse
 import json
+import os
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
 
 # Create your views here.
 def logout(request):
@@ -218,3 +217,24 @@ def get_doc_info(request, random_str):
         "wb_version": document.wb_version,
     }
     return HttpResponse(json.dumps(re))
+
+
+def get_latex_templates(request):
+    path = os.path.join(BASE_DIR, 'static/LaTex')
+    lst = []
+    for i in os.listdir(path):
+        temp_path = os.path.join(path, i)
+        re = {
+            'category': i,
+            'list': []
+        }
+        lst.append(re)
+        for j in os.listdir(temp_path):
+            tp = os.path.join(temp_path, j)
+            tp = os.path.join(tp, 'reference.txt')
+            f = open(tp, 'r')
+            re['list'].append({
+                'title': j,
+                'reference': f.readlines()[0]
+            })
+    return HttpResponse(json.dumps(lst))

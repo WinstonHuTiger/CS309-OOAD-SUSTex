@@ -18,9 +18,15 @@ class ProjectPage extends React.Component {
   }
 
   componentWillMount() {
-    const _this = this;
     startTime = new Date();
-    console.log("GET" + window.url + '/user/');
+    NProgress.start();
+  }
+
+  componentDidMount() {
+    console.log(this.props.match.params)
+    let endTime = new Date();
+    let timeInterval = endTime.getTime() - startTime.getTime();
+    const _this = this;
     axios.get(window.url + '/user/',
     {headers:{'Content-Type':'application/x-www-form-urlencoded'}}
     )
@@ -30,27 +36,27 @@ class ProjectPage extends React.Component {
       _this.setState({
         users: response.data,
       });
+      if (timeInterval <= 500){
+        setTimeout(function(){
+          NProgress.done();
+        }, 500 - timeInterval);
+      } else {
+        NProgress.done();
+      }
     })
     .catch(function (error) {
       console.log(error);
       _this.setState({
         users: null,
-      })
-    })
-    NProgress.start();
-  }
-
-  componentDidMount() {
-    console.log(this.props.match.params)
-    let endTime = new Date();
-    let timeInterval = endTime.getTime() - startTime.getTime();
-    if (timeInterval <= 500){
-      setTimeout(function(){
+      });
+      if (timeInterval <= 500){
+        setTimeout(function(){
+          NProgress.done();
+        }, 500 - timeInterval);
+      } else {
         NProgress.done();
-      }, 500 - timeInterval);
-    } else {
-      NProgress.done();
-    }
+      }
+    })
   }
 
   changeMode = (mode) => {

@@ -46,4 +46,5 @@ urlpatterns = [
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
     path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
     path('project/<str:random_str>/rename/', views.rename_project),
+    path('templates/latex/', views.get_latex_templates),
 ]

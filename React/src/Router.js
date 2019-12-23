@@ -10,7 +10,7 @@ const BasicRoute = () => (
         <Switch>
             <Route exact path="/project/:random_str" component={ProjectPage}/>
             <Route exact path="/workbench" component={WorkBenchPage}/>
-            <Route exact path="/templates" component={TemplatesPage}/>
+            <Route exact path="/templates/" component={TemplatesPage}/>
         </Switch>
     </HashRouter>
 );
