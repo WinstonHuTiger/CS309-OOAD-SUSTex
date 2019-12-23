@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Header from './Header';
 import { HashLink as Link } from 'react-router-hash-link';
-import { Menu, Icon, Breadcrumb, Row, Col, Typography, Divider } from 'antd';
+import { Menu, Icon, Breadcrumb, Row, Col, Typography, Divider, message } from 'antd';
 import { Skeleton, Switch, Card, Avatar, Button } from 'antd';
 import { Layout } from 'antd';
 import axios from 'axios';
@@ -185,7 +185,10 @@ class Content extends Component {
 
   render() {
     const contentList = this.props.data.map((item, index) =>
-      <Template data={item} />
+      <>
+        <Template data={item} />
+        <Divider />
+      </>
     );
     return(
       <div className="templates-content-text">

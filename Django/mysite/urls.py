@@ -28,7 +28,6 @@ urlpatterns = [
     path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
     path('project/authorize/<str:code>/', views.authorize_user),
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
-    path('project/<str:random_str>/edit/<str:filename>/', views.edit_doc),  #
     path('project/<str:random_str>/create/document/', views.create_doc),
     path('project/<str:random_str>/document/', views.get_doc_info),
     path('project/<str:random_str>/', views.get_project_info),
