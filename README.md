@@ -1,7 +1,7 @@
 # CS309-OOAD-SUSTex
 ## Environment
 ### Backend 
-python 3.6 above is aquired.
+python 3.6 above is required.
 
 django version is 2.2.7
 
