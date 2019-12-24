@@ -51,6 +51,7 @@ class UserAvatar extends Component {
       message.success("Logout out successfully!");
       setTimeout(() => {
         _this.props.history.push('/workbench/');
+        window.location.reload();
       }, 300);
     })
     .catch(function(error) {
@@ -66,7 +67,7 @@ class UserAvatar extends Component {
             <Menu className="dropdown-menu">
                 <li className="dropdown-li none-select">Hello, <b>{this.props.userInfo["alias"]}</b></li>
                 <Menu.Divider />
-                <Menu.Item onClick={this.logout}>Logout</Menu.Item>
+                <Menu.Item onClick={this.logout}><span className="grey" style={{fontSize: "15px"}}>Sign out</span></Menu.Item>
             </Menu>
           }>
             <div onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
@@ -81,7 +82,7 @@ class UserAvatar extends Component {
             </div>
           </Dropdown>
         ):(
-          <Button style={githubButtonStyle} href= {window.url + "/login/github/"}>
+          <Button style={githubButtonStyle} href={window.url + "/login/github/"}>
             <Icon type="github" /> Login with Github
           </Button>
         )}

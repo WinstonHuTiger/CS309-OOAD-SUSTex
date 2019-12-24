@@ -37,7 +37,7 @@ urlpatterns = [
     path('project/<str:random_str>/download/file/', file_operation.download_file),
     path('project/<str:random_str>/delete/file/', file_operation.delete_file),
     path('project/<str:random_str>/compile/', file_operation.compile_pdf),
-    path('project/<str:random_str>/remove/path/', file_operation.rename_path),
+    path('project/<str:random_str>/rename/path/', file_operation.rename_path),
     path('project/<str:random_str>/rename/file/', file_operation.rename_file),
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),
     path('project/<str:random_str>/users/current/', views.get_current_users),  #
@@ -47,4 +47,5 @@ urlpatterns = [
     path('project/<str:random_str>/rename/', views.rename_project),
     path('templates/latex/', views.get_latex_templates),
     path('project/<str:random_str>/download/', file_operation.download_project),
+    path('project/<str:random_str>/delete/', views.delete_project)
 ]
