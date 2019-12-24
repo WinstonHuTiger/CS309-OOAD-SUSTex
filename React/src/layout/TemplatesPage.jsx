@@ -233,7 +233,7 @@ class TemplatesPage extends Component {
           userInfo: msg.data["message"]
         })
       } else if (msg.data["code"] == 2) {
-        message.warning('Please Login First');
+
       }
     })
     .catch(function(error) {

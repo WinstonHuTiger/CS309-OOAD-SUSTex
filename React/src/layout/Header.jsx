@@ -59,7 +59,6 @@ class UserAvatar extends Component {
   }
 
   render() {
-    console.log(this.props.userInfo);
     return(
       <>
         {this.props.userInfo != null ? (

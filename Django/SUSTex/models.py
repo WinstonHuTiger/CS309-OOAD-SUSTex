@@ -117,24 +117,26 @@ class Project(models.Model):
         path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
         res = {'dirname': 'root', 'child_dirs': [], 'files': []}
         list_dir(path, res)
+        res['name'] = self.name
         res['random_str'] = self.random_str
         res['user_info'] = self.get_users()
-        res['name'] = self.name
-        return get_json(res)
+        return res
 
     def get_users(self):
-        response = UserProject.objects.filter(project=self)
         lst = []
+        creator = UserProject.objects.get(project=self, type="Creator")
+        lst.append({"alias": creator.user.alias, "authority": creator.authority, "type": "Creator", "avatar_url": creator.user.avatar_url})
+        response = UserProject.objects.filter(project=self, type="Member")
         for i in response:
-            lst.append({"user": i.user.id, "authority": i.authority})
-        data = {'users': lst}
-        return data
+            lst.append({"alias": i.user.alias, "authority": i.authority, "type": i.type, "avatar_url": i.user.avatar_url})
+        return lst
 
 
 class UserProject(models.Model):
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     authority = models.CharField(max_length=2, default='rw', null=False)
+    type = models.CharField(max_length=10, null=False, default="Member")
 
     class Meta:
         unique_together = ('project', 'user')
@@ -144,8 +146,8 @@ class UserProject(models.Model):
         return get_json(data)
 
     def get_dict(self):
-        return {"project": self.project.random_str, "name": self.project.name, "last_modify": str(self.project.last_modify),
-                "authority": self.authority}
+        return {"name": self.project.name, "project": self.project.random_str, "last_modify": str(self.project.last_modify),
+                "users": self.project.get_users()}
 
 
 class Document(models.Model):

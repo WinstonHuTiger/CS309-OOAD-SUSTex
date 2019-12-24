@@ -102,7 +102,7 @@ def create_project(request):
     project.create_project_path()
     project.save()
     project.create_document()
-    user_project = UserProject(project=project, user=user)
+    user_project = UserProject(project=project, user=user, type="Creator")
     user_project.save()
     re = {'project': json.loads(project.__str__()), 'user_project': json.loads(user_project.__str__())}
     return HttpResponse(json.dumps(re))
@@ -187,7 +187,7 @@ def get_user_projects(request):
     lst = []
     for i in response:
         lst.append(i.get_dict())
-    return get_response(ResponseType.SUCCESS, json.dumps(lst))
+    return get_response(ResponseType.SUCCESS, lst)
 
 
 def get_versions(request, random_str, filename):

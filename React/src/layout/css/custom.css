@@ -289,3 +289,86 @@ html, body {
 .dropdown-menu {
   width: 150px;
 }
+
+.workbench-content {
+  margin: 80px 40px 0 40px;
+  min-height: calc(100vh - 70px);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.workbench-menu {
+  border-radius: 10px;
+}
+
+.card {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
+  transition: .3s ease;
+}
+
+.card-hover {
+  border-radius: 10px !important;
+  box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14);
+}
+
+.workbench-container {
+  padding: 20px;
+}
+
+.project-card-menu {
+  width: 120px;
+}
+
+.project-title {
+  font-size: 20px;
+  font-weight: 400;
+  color: #0d1a26;
+}
+
+.card .ant-card-head-title, .card-hover .ant-card-head-title {
+  padding: 8px 0;
+}
+
+.card .ant-card-body, .card-hover .ant-card-body {
+  padding: 12px 20px;
+}
+
+.project-card-container {
+  height: 120px;
+}
+
+.project-card-members {
+  height: 70px;
+  word-break:keep-all;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:block;
+  margin-bottom: 10px;
+}
+
+.project-card-last {
+  height: 30px;
+}
+
+.project-card-tag {
+  font-size: 16px;
+  font-weight: 350;
+  color: #0d1a26;
+  margin-bottom: 10px;
+}
+
+.popover-creater {
+  color: #da4453;
+}
+
+.align-right {
+  text-align: right;
+  font-weight: 400;
+}
+
+.user-popover {
+  width: 170px;
+}

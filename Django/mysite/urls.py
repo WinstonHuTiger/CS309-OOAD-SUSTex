@@ -23,7 +23,7 @@ urlpatterns = [
     path('login/github/complete', github_login.complete),
     path('logout/', views.logout),
     path('user/', views.get_user_info),
-    path('user/projects', views.get_user_projects),
+    path('user/projects/', views.get_user_projects),
     path('project/create/', views.create_project),
     path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
     path('project/authorize/<str:code>/', views.authorize_user),
