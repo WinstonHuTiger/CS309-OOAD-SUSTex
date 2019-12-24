@@ -1,3 +1,6 @@
-requests
-django-cors-headers
-channels
+django==2.2.7
+requests==2.22.0
+django-cors-headers==3.2.0
+channels==2.3.1
+channels_redis==2.4.1
+
