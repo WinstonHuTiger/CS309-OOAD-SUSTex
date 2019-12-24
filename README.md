@@ -29,15 +29,15 @@ Then, for the open browser, please type http://localhost:3000/#/templates to get
 
 ## To add a template into backend static folder
 
-## ![](/Users/winston/Dev/CS309-OOAD-SUSTex/dependency/截屏2019-12-24下午7.13.58.png)
+![static](dependency/static.png)
 
 The static folder is inside the Django folder, and inside each kind, there are several templates.
 
-![](/Users/winston/Dev/CS309-OOAD-SUSTex/dependency/截屏2019-12-24下午7.29.07.png)
+![classes](dependency/classes.png)
 
 For each templates, there are 3 required file: the first one is a tex one, which is the main tex file for the template; the second one is a text one, which is the original template url ; the third one is the preview pdf file. For those projects with photos, the resolution should be 1350×1900, otherwise the wired situation will happen.
 
-![](/Users/winston/Dev/CS309-OOAD-SUSTex/dependency/截屏2019-12-24下午7.32.33.png)
+![files](dependency/files.png)
 
 
 
