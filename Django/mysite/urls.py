@@ -25,6 +25,8 @@ urlpatterns = [
     path('user/', views.get_user_info),
     path('user/projects/', views.get_user_projects),
     path('project/create/', views.create_project),
+    path('project/create/template/', file_operation.create_from_template),
+    path('project/import/', file_operation.import_project),
     path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
     path('project/authorize/<str:code>/', views.authorize_user),
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
@@ -47,5 +49,5 @@ urlpatterns = [
     path('project/<str:random_str>/rename/', views.rename_project),
     path('templates/latex/', views.get_latex_templates),
     path('project/<str:random_str>/download/', file_operation.download_project),
-    path('project/<str:random_str>/delete/', views.delete_project)
+    path('project/<str:random_str>/delete/', views.delete_project),
 ]

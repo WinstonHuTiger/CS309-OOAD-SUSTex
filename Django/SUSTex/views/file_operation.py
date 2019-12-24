@@ -2,11 +2,25 @@ from django.http import HttpResponse, FileResponse
 from wsgiref.util import FileWrapper
 from SUSTex.models import User, Project, UserProject, Document
 from SUSTex.views.views import get_response, ResponseType
-import zipfile, tempfile, json, os, subprocess
+import zipfile, tempfile, json, os, subprocess, shutil
+
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
 USER_FILES_DIR = os.path.join(BASE_DIR, 'UserData/Projects/')
 ALLOWED_POSTFIX = ['tex', 'bib', 'txt', 'md']
+
+
+# https://blog.csdn.net/weixin_42934547/article/details/82142476
+def copy_dir(path, out):
+    for files in os.listdir(path):
+        name = os.path.join(path, files)
+        back_name = os.path.join(out, files)
+        if os.path.isfile(name):
+            shutil.copy(name, back_name)
+        else:
+            if not os.path.isdir(back_name):
+                os.makedirs(back_name)
+            copy_dir(name, back_name)
 
 
 def file_manage_verify(request, random_str):
@@ -210,3 +224,45 @@ def download_project(request, random_str):
             z.write(os.path.join(dir_path, filename), os.path.join(f_path, filename))
     response['Content-Disposition'] = 'attachment; filename=Package.zip'
     return response
+
+
+def import_project(request):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    try:
+        file = request.FILES.get('file')
+        zf = zipfile.ZipFile(file)
+        user = User.objects.get(id=request.user.id)
+        project = Project(name=str(file).split(".")[0])
+        project.generate_random_str()
+        project.create_project_path()
+        project_path = os.path.join(USER_FILES_DIR, project.random_str)
+        zf.extractall(project_path)
+        project.save()
+        user_project = UserProject(project=project, user=user, type="Creator")
+        user_project.save()
+    except Exception as e:
+        print(str(e))
+        return get_response(ResponseType.FILE_CORRUPTED)
+    return get_response(ResponseType.SUCCESS, "Import project successfully!")
+
+
+def create_from_template(request):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    project_name = request.GET["name"]
+    category = request.GET["category"]
+    title = request.GET["title"]
+    folder_path = os.path.join(BASE_DIR, 'static/LaTex')
+    folder_path = os.path.join(folder_path, category)
+    folder_path = os.path.join(folder_path, title)
+    user = User.objects.get(id=request.user.id)
+    project = Project(name=project_name)
+    project.generate_random_str()
+    project.create_project_path()
+    project_path = os.path.join(USER_FILES_DIR, project.random_str)
+    copy_dir(folder_path, project_path)
+    project.save()
+    user_project = UserProject(project=project, user=user, type="Creator")
+    user_project.save()
+    return get_response(ResponseType.SUCCESS, "SUCCESS")

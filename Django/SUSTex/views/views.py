@@ -20,6 +20,8 @@ class ResponseType(Enum):
     ALREADY_IN_PROJECT = 7
     DOCUMENT_NOT_FOUND = 8
     VERSION_NOT_FOUND = 9
+    FILE_CORRUPTED = 10
+    DELETE_ERROR = 11
 
 
 def get_response(res_type, message=None):
@@ -33,7 +35,7 @@ def get_response(res_type, message=None):
         return HttpResponse(json.dumps({
             "type": "error",
             "code": ResponseType.NOT_AUTHENTICATED.value,
-            "message": "Not login or invalid session."
+            "message": "Not login or invalid cookie."
         }))
     elif res_type == ResponseType.PROJECT_NOT_FOUND.value:
         return HttpResponse(json.dumps({
@@ -76,6 +78,18 @@ def get_response(res_type, message=None):
             "type": "error",
             "code": ResponseType.VERSION_NOT_FOUND.value,
             "message": "Document version: %d not found." % message
+        }))
+    elif res_type == ResponseType.FILE_CORRUPTED:
+        return HttpResponse(json.dumps({
+            "type": "error",
+            "code": ResponseType.FILE_CORRUPTED.value,
+            "message": "Invalid zip file."
+        }))
+    elif res_type == ResponseType.DELETE_ERROR:
+        return HttpResponse(json.dumps({
+            "type": "error",
+            "code": ResponseType.DELETE_ERROR.value,
+            "message": "Delete error, please try latter."
         }))
 
 
@@ -314,5 +328,13 @@ def delete_project(request, random_str):
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    project_path = os.path.join(BASE_DIR, "UserData/Projects")
+    project_path = os.path.join(project_path, random_str)
+    try:
+        import shutil
+        shutil.rmtree(project_path)
+    except Exception as e:
+        print(e)
+        return get_response(ResponseType.DELETE_ERROR)
     project.delete()
     return get_response(ResponseType.SUCCESS, "Delete Project Successfully!")

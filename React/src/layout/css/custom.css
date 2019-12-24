@@ -322,6 +322,7 @@ html, body {
 }
 
 .project-title {
+  height: 30px !important;
   font-size: 20px;
   font-weight: 400;
   color: #0d1a26;
@@ -380,4 +381,8 @@ html, body {
 
 .grey {
   color: #24292e!important;
+}
+
+.ant-modal-content .anticon-download {
+  display: none;
 }

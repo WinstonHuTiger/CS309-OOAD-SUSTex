@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Header from './Header';
 import { HashLink as Link } from 'react-router-hash-link';
-import { Menu, Icon, Breadcrumb, Row, Col, Typography, Divider, message } from 'antd';
+import { Menu, Icon, Breadcrumb, Row, Col, Typography, Divider, message,
+    Modal, Input } from 'antd';
 import { Skeleton, Switch, Card, Avatar, Button } from 'antd';
 import { Layout } from 'antd';
 import axios from 'axios';
@@ -53,9 +54,12 @@ class TemplateCard extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      category: props.category,
       path: props.path,
       title: props.title,
       reference: props.reference,
+      emptyProject: false,
+      nameValue: null,
     };
   }
 
@@ -80,13 +84,57 @@ class TemplateCard extends Component {
     })
   }
 
-  handleImport = () => {
+  emptyProject = () => {
+    this.setState({
+      emptyProject: true
+    });
+  }
 
+  emptyCancel = () => {
+    this.setState({
+      emptyProject: false
+    });
   }
 
   componentDidMount() {
     this.setState({
       loading: false
+    })
+  }
+
+  emptyOk = () => {
+    if (this.state.nameValue == null) {
+      message.error("Project name is empty!");
+      return;
+    }
+    const _this = this;
+    axios.get(window.url + '/project/create/template/',{
+      params: {
+        name: this.state.nameValue,
+        category: this.state.category,
+        title: this.state.title,
+      }
+    })
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        message.success("Create empty project successfully!");
+        _this.props.history.push("/workbench/");
+      } else {
+        message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+    this.setState({
+      emptyProject: false,
+      nameValue: null
+    });
+  }
+
+  inputName = ({ target: { value } }) => {
+    this.setState({
+      nameValue: value
     })
   }
 
@@ -111,7 +159,7 @@ class TemplateCard extends Component {
                   href={this.state.path + '/main.pdf'} target="_blank">
                   View PDF
                 </Button>
-                <Button shape="round" icon="project" size="medium" onClick={this.handleImport}>
+                <Button shape="round" icon="project" size="medium" onClick={this.emptyProject}>
                   Import
                 </Button>
               </div>
@@ -126,6 +174,18 @@ class TemplateCard extends Component {
             </>} />
           </Card>
         </Row>
+        <Modal
+          title="New Project"
+          visible={this.state.emptyProject}
+          onOk={this.emptyOk}
+          onCancel={this.emptyCancel}
+        >
+          <Input placeholder="name"
+            value={this.state.nameValue}
+            onChange={this.inputName}
+            onPressEnter={this.emptyOk}
+            autoFocus/>
+        </Modal>
       </div>
     );
   }
@@ -154,7 +214,10 @@ class Template extends Component {
             title={item["title"]}
             path={window.url + '/static/LaTex/' + this.state.category + '/'
             + item['title']}
-            reference={item["reference"]}/>
+            reference={item["reference"]}
+            category={this.state.category}
+            history={this.props.history}
+            />
         </Col>
     );
     return(
@@ -175,9 +238,10 @@ class Template extends Component {
 class Content extends Component {
 
   render() {
+    const _this = this;
     const contentList = this.props.data.map((item, index) =>
       <>
-        <Template data={item} />
+        <Template data={item} history={_this.props.history}/>
         <Divider />
       </>
     );
@@ -252,7 +316,7 @@ class TemplatesPage extends Component {
             </Col>
             <Col span={20}>
               <Layout.Content className="templates-content">
-                <Content data={this.state.data}/>
+                <Content data={this.state.data} history={this.props.history}/>
               </Layout.Content>
             </Col>
           </Row>
