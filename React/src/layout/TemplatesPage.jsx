@@ -4,6 +4,7 @@ import { HashLink as Link } from 'react-router-hash-link';
 import { Menu, Icon, Breadcrumb, Row, Col, Typography, Divider, message,
     Modal, Input } from 'antd';
 import { Skeleton, Switch, Card, Avatar, Button } from 'antd';
+import NProgress from '../tools/nprogress';
 import { Layout } from 'antd';
 import axios from 'axios';
 
@@ -11,6 +12,7 @@ const { Footer, Sider } = Layout;
 const { Title, Paragraph, Text } = Typography;
 const { SubMenu } = Menu;
 const { Meta } = Card;
+var startTime;
 
 class LeftMenu extends Component {
   state = {
@@ -103,7 +105,7 @@ class TemplateCard extends Component {
   }
 
   emptyOk = () => {
-    if (this.state.nameValue == null) {
+    if (this.state.nameValue == null || this.state.nameValue == "") {
       message.error("Project name is empty!");
       return;
     }
@@ -264,6 +266,8 @@ class TemplatesPage extends Component {
       categorys: 0,
       userInfo: null,
     }
+    startTime = new Date();
+    NProgress.start();
   }
 
   componentDidMount() {
@@ -282,7 +286,6 @@ class TemplatesPage extends Component {
         _this.setState({
           data: msg.data["message"]
         });
-
       } else {
           message.error('Error code: ' + msg.data["code"] + ', ' + msg.data["message"])
       }
@@ -303,6 +306,15 @@ class TemplatesPage extends Component {
     .catch(function(error) {
       console.log(error);
     });
+    let endTime = new Date();
+    let timeInterval = endTime.getTime() - startTime.getTime();
+    if (timeInterval <= 500){
+      setTimeout(function(){
+        NProgress.done();
+      }, 500 - timeInterval);
+    } else {
+      NProgress.done();
+    }
   }
 
   render() {

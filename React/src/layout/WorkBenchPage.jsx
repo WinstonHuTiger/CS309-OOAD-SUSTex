@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Layout, Menu, Icon, Card, Row, Col, Dropdown, Avatar, Popover
   , Divider, Input, message, Button, Modal, Upload } from 'antd';
 import { Link } from 'react-router-dom';
+import NProgress from '../tools/nprogress';
 import copy from 'copy-to-clipboard';
 import Header from './Header';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import axios from 'axios';
 const { Dragger } = Upload;
 const { confirm } = Modal;
 const { SubMenu } = Menu;
+var startTime;
 
 class UserAvatar extends Component {
   render() {
@@ -23,7 +25,7 @@ class UserAvatar extends Component {
             <div>Authority: <b>{this.props.userInfo["authority"] == "rw" ? "Read And Write" : "Read Only"}</b></div>
         </div>
       } trigger="hover">
-        <Avatar shape="square" size={35} src="https://avatars1.githubusercontent.com/u/35868425?v=4"/>
+        <Avatar shape="square" size={35} src={this.props.userInfo["avatar_url"]}/>
       </Popover>
     );
   }
@@ -179,7 +181,8 @@ class ProjectCard extends Component {
 class WorkBenchPage extends Component {
   constructor(props) {
     super(props);
-    this.ref = React.createRef();
+    startTime = new Date();
+    NProgress.start();
   }
 
   state = {
@@ -194,6 +197,15 @@ class WorkBenchPage extends Component {
   componentDidMount() {
     this.updateUserInfo();
     this.updateProjectInfo();
+    let endTime = new Date();
+    let timeInterval = endTime.getTime() - startTime.getTime();
+    if (timeInterval <= 500){
+      setTimeout(function(){
+        NProgress.done();
+      }, 500 - timeInterval);
+    } else {
+      NProgress.done();
+    }
   }
 
   updateProjectInfo = () => {

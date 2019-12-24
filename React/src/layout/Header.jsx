@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Row, Col, Button, Icon, Menu, Avatar, Dropdown, message } from 'antd';
+import NProgress from '../tools/nprogress';
 import './css/custom.css';
 import { Link } from "react-router-dom"
 import axios from 'axios';

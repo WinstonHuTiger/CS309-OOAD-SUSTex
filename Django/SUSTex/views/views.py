@@ -322,12 +322,27 @@ def get_latex_templates(request):
 
 
 def delete_project(request, random_str):
+    """Check user cookie first, remove project file from disk and
+    then delete project from database.
+    Only user who has read and write priority can delete the project.
+
+    :param request: request from client
+    :param random_str: a string identifies the project
+    :return: ok response or error response
+    """
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    user = User.objects.get(id=request.user.id)
+    response = UserProject.objects.filter(user=user, project=project)
+    if response.count() == 0:
+        return get_response(ResponseType.NOT_IN_PROJECT)
+    user_project = response[0]
+    if user_project.authority != 'rw':
+        return get_response(ResponseType.NO_AUTHORITY)
     project_path = os.path.join(BASE_DIR, "UserData/Projects")
     project_path = os.path.join(project_path, random_str)
     try:
