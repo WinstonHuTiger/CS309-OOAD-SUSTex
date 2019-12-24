@@ -15,10 +15,34 @@ requests version is  2.22.0
 
 django-cors-headers version is 3.2.0 
 
-Moreover, the requirements.txt is modified to satify the environment. To install the dependency, please run 
+Moreover, the requirements.txt is modified to satisfy the environment. To install the dependency, please run
+
 ```
 pip install -r requirements.txt
 ```
+
+### Redis
+
+- Download or Install 
+You can download the redis from this website https://redis.io/download, or here https://github.com/antirez/redis; 
+1. Download
+If you are on macOS, you can Use Homebrew to install 
+```
+brew install redis
+
+brew services start redis
+```
+2. Open & Test Redis
+If you are on Windows, you have to start the sever manually by changing the directory and get started. 
+
+Moreover, you can find help from here: https://stackoverflow.com/questions/31769097/cant-bind-tcp-listener-6379-using-redis-on-windows
+
+3. Layers in Django
+After you install and get started redis running, you could have to set the setting correct layers in django in Django/mysite/setting.py, by following the default setting from channels official website as following:
+
+
+
+
 
 ### Frontend
 
