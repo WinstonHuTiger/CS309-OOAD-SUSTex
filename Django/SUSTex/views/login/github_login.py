@@ -14,7 +14,7 @@ LOGIN_API_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_
                 % (GITHUB_CLIENT_ID, REDIRECT_URI, LOGIN_SCOPE)
 TOKEN_API_URL = 'https://github.com/login/oauth/access_token?client_id=%s&client_secret=%s&code=' \
                 % (GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET)
-REDIRECT_FRONT_URL = 'http://127.0.0.1:3000/'
+REDIRECT_FRONT_URL = 'http://127.0.0.1:3000/#/workbench/'
 
 
 def login(request):

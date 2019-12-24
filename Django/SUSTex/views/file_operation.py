@@ -1,8 +1,7 @@
 from django.http import HttpResponse, FileResponse
+from wsgiref.util import FileWrapper
 from SUSTex.models import User, Project, UserProject, Document
-import subprocess
-import json
-import os
+import zipfile, tempfile, json, os, subprocess
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
 USER_FILES_DIR = os.path.join(BASE_DIR, 'UserData/Projects/')
@@ -195,3 +194,16 @@ def compile_pdf(request, random_str):
         response['Content-Type'] = 'application/pdf'
         return response
     return HttpResponse('LaTex Document does not exist')
+
+
+# https://stackoverflow.com/questions/67454/serving-dynamically-generated-zip-archives-in-django
+def download_project(request, random_str):
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    response = HttpResponse(content_type='application/zip')
+    z = zipfile.ZipFile(response, 'w', zipfile.ZIP_DEFLATED)
+    for dir_path, dir_names, file_names in os.walk(project_path):
+        f_path = dir_path.replace(project_path, '')
+        for filename in file_names:
+            z.write(os.path.join(dir_path, filename), os.path.join(f_path, filename))
+    response['Content-Disposition'] = 'attachment; filename=Package.zip'
+    return response

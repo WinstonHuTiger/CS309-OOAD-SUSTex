@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from SUSTex.models import User, Project, Document, UserProject, Authorization, DocumentChange
 from Utils.diff_match_patch import diff_match_patch
 import json
