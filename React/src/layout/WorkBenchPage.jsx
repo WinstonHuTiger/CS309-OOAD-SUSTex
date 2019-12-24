@@ -92,7 +92,7 @@ class WorkBenchPage extends Component {
   }
 
   state = {
-    userInfo: [],
+    userInfo: null,
     projectsInfo: []
   };
 
@@ -123,9 +123,12 @@ class WorkBenchPage extends Component {
   }
 
   render() {
-    const projects = this.state.projectsInfo.map((item, index) =>
-      <ProjectCard projectInfo={item} />
-    );
+    const projects = null;
+    if (this.state.projectsInfo.lenght > 0) {
+      projects = this.state.projectsInfo.map((item, index) =>
+        <ProjectCard projectInfo={item} />
+      );
+    }
     return(
       <Layout>
         <Header page='workbench' userInfo={this.state.userInfo} history={this.props.history}/>
