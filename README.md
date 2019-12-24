@@ -2,11 +2,17 @@
 ## Environment
 ### Backend 
 python 3.6 above is aquired.
+
 django version is 2.2.7
+
 channels version is 2.3.1
+
 channels_redis version is 2.4.1
+
 redis version is 5.0.7
+
 requests version is  2.22.0
+
 django-cors-headers version is 3.2.0 
 
 Moreover, the requirements.txt is modified to satify the environment. To install the dependency, please run 
