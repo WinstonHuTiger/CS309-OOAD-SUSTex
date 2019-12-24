@@ -105,7 +105,7 @@ def create_project(request):
     user_project = UserProject(project=project, user=user, type="Creator")
     user_project.save()
     re = {'project': json.loads(project.__str__()), 'user_project': json.loads(user_project.__str__())}
-    return HttpResponse(json.dumps(re))
+    return get_response(ResponseType.SUCCESS, re)
 
 
 def create_doc(request, random_str):
@@ -305,3 +305,14 @@ def get_latex_templates(request):
                 'index': idx
             })
     return get_response(ResponseType.SUCCESS, lst)
+
+
+def delete_project(request, random_str):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project = response[0]
+    project.delete()
+    return get_response(ResponseType.SUCCESS, "Delete Project Successfully!")

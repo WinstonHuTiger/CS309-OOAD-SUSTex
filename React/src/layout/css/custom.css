@@ -372,3 +372,12 @@ html, body {
 .user-popover {
   width: 170px;
 }
+
+#new-project-btn {
+  float: right;
+  margin: 8px 15px 0 0;
+}
+
+.grey {
+  color: #24292e!important;
+}
