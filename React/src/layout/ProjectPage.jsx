@@ -379,6 +379,14 @@ class FileManagement extends Component {
     });
   };
 
+  renderDir = () => {
+
+  }
+
+  renderFile = () => {
+    
+  }
+
   render(){
       return(
         <>
@@ -422,7 +430,7 @@ class ProjectPage extends Component {
     super(props);
     this.state = {
       userInfo: null,
-      random_str: props.match.params.random_str
+      projectInfo: null
     };
   }
 
@@ -452,13 +460,35 @@ class ProjectPage extends Component {
       } else {
         message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
       }
+      _this.updateProjectInfo();
     })
     .catch(function (error) {
       message.error("Server Error!");
       _this.setState({
         users: null,
       });
+    });
+  }
+
+  updateProjectInfo = () => {
+    const _this = this;
+    axios.get(window.url + "/project/" + this.props.match.params["random_str"] + "/")
+    .then((msg) => {
+      console.log(msg);
+      if (msg.data["code"] == 1) {
+        _this.setState({
+          projectInfo: msg.data["message"]
+        });
+        console.log(msg.data["message"]["files"])
+      } else if (msg.data["code"] == 2) {
+
+      } else {
+        message.error("Error code: " + msg.data["code"] + ", " + msg.data["message"]);
+      }
     })
+    .catch((error) => {
+      console.log(error);
+    });
   }
 
   render() {
@@ -466,7 +496,9 @@ class ProjectPage extends Component {
       <Layout>
           <Header page="project" userInfo={this.state.userInfo}/>
           <Layout>
-            <FileManagement project={this.state.random_str}/>
+            <FileManagement
+              updateProjectInfo={this.updateProjectInfo}
+              projectInfo={this.state.projectInfo}/>
           </Layout>
       </Layout>
     );

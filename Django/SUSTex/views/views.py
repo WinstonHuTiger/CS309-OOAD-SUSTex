@@ -38,7 +38,7 @@ def get_response(res_type, message=None):
             "code": ResponseType.NOT_AUTHENTICATED.value,
             "message": "Not login or invalid cookie."
         }))
-    elif res_type == ResponseType.PROJECT_NOT_FOUND.value:
+    elif res_type == ResponseType.PROJECT_NOT_FOUND:
         return HttpResponse(json.dumps({
             "type": "error",
             "code": ResponseType.PROJECT_NOT_FOUND.value,
@@ -142,6 +142,7 @@ def create_doc(request, random_str):
 
 
 def get_project_info(request, random_str):
+    print(random_str)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)

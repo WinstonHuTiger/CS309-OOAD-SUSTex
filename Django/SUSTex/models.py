@@ -131,12 +131,14 @@ class Project(models.Model):
 
     def get_info(self):
         path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
-        res = {'dirname': 'root', 'child_dirs': [], 'files': []}
+        res = {'child_dirs': [], 'files': []}
         list_dir(path, res)
-        res['name'] = self.name
-        res['random_str'] = self.random_str
-        res['user_info'] = self.get_users()
-        return res
+        re = {
+            'name': self.name,
+            'random_str': self.random_str,
+            'files': res
+        }
+        return re
 
     def get_users(self):
         lst = []
