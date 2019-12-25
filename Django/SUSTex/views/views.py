@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth
 from django.http import HttpResponse, FileResponse
-from SUSTex.models import User, Project, Document, UserProject, Authorization, DocumentChange
+from SUSTex.models import User, Project, Document, UserProject, DocumentChange, Invitation, AuthorityChange
 from Utils.diff_match_patch import diff_match_patch
 import json
 import os
@@ -16,12 +16,13 @@ class ResponseType(Enum):
     PROJECT_NOT_FOUND = 3
     NOT_IN_PROJECT = 4
     NO_AUTHORITY = 5
-    INVALID_AUTHORITY_CODE = 6
+    INVALID_AUTHORITY = 6
     ALREADY_IN_PROJECT = 7
     DOCUMENT_NOT_FOUND = 8
     VERSION_NOT_FOUND = 9
     FILE_CORRUPTED = 10
     DELETE_ERROR = 11
+    USER_NOT_FOUND = 12
 
 
 def get_response(res_type, message=None):
@@ -55,11 +56,11 @@ def get_response(res_type, message=None):
             "code": ResponseType.NO_AUTHORITY.value,
             "message": "You do not have permission to modify the file."
         }))
-    elif res_type == ResponseType.INVALID_AUTHORITY_CODE:
+    elif res_type == ResponseType.INVALID_AUTHORITY:
         return HttpResponse(json.dumps({
             "type": "error",
-            "code": ResponseType.INVALID_AUTHORITY_CODE.value,
-            "message": "Authority code is invalid."
+            "code": ResponseType.INVALID_AUTHORITY.value,
+            "message": "Invalid authority."
         }))
     elif res_type == ResponseType.ALREADY_IN_PROJECT:
         return HttpResponse(json.dumps({
@@ -90,6 +91,12 @@ def get_response(res_type, message=None):
             "type": "error",
             "code": ResponseType.DELETE_ERROR.value,
             "message": "Delete error, please try latter."
+        }))
+    elif res_type == ResponseType.USER_NOT_FOUND:
+        return HttpResponse(json.dumps({
+            "type": "error",
+            "code": ResponseType.USER_NOT_FOUND.value,
+            "message": "User not found."
         }))
 
 
@@ -141,56 +148,6 @@ def get_project_info(request, random_str):
     project = response[0]
     info = project.get_info()
     return get_response(ResponseType.SUCCESS, info)
-
-
-def authorize_to_other(request, random_str, authority):
-    if not request.user.is_authenticated:
-        return get_response(ResponseType.NOT_AUTHENTICATED)
-    response = Project.objects.filter(random_str=random_str)
-    if response.count() == 0:
-        return get_response(ResponseType.PROJECT_NOT_FOUND)
-    project = response[0]
-    user = User.objects.get(id=request.user.id)
-    response = UserProject.objects.filter(project=project, user=user)
-    if response.count() == 0:
-        return get_response(ResponseType.ALREADY_IN_PROJECT)
-    user_project = response[0]
-    if user_project.authority != 'rw':
-        return get_response(ResponseType.NO_AUTHORITY)
-    response = Authorization.objects.filter(user=user, project=project)
-    if authority == 'rw' and authority == 'r':
-        return get_response(ResponseType.INVALID_AUTHORITY_CODE)
-    if response.count() != 0:
-        authorization = response[0]
-        authorization.authority = authority
-        authorization.save()
-        return get_response(ResponseType.SUCCESS, response[0])
-    else:
-        authorization = Authorization(project=project, user=user, authority=authority)
-        authorization.get_random_code()
-        authorization.save()
-        return get_response(ResponseType.SUCCESS, authority)
-
-
-def authorize_user(request, code):
-    if not request.user.is_authenticated:
-        return get_response(ResponseType.NOT_AUTHENTICATED)
-    user = User.objects.get(id=request.user.id)
-    response = Authorization.objects.filter(code=code)
-    if response.count() == 0:
-        return get_response(ResponseType.INVALID_AUTHORITY_CODE)
-    authorization = response[0]
-    response = UserProject.objects.filter(project=authorization.project, user=user)
-    if response.count() != 0:
-        return get_response(ResponseType.ALREADY_IN_PROJECT)
-    user_project = UserProject(user=user, project=authorization.project, authority=authorization.authority)
-    user_project.save()
-    authorization.delete()
-    return get_response(ResponseType.SUCCESS, user_project)
-
-
-def get_current_users(request):
-    return HttpResponse('get current users')
 
 
 def get_user_projects(request):
@@ -358,16 +315,77 @@ def delete_project(request, random_str):
 def search_user(request):
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
-    random_id = request.GET["random_id"]
+    random_id = request.GET["user"]
+    random_str = request.GET["project"]
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project = response[0]
     if random_id == "":
         return get_response(ResponseType.SUCCESS, [])
     response = User.objects.filter(random_id__regex=r'^%s[0-9]*$' % random_id)
     re = []
     for i in response:
-        item = {
-            "random_id": i.random_id,
-            "alias": i.alias,
-            "avatar_url": i.avatar_url
-        }
-        re.append(item)
+        response_ = UserProject.objects.filter(project=project, user=i)
+        if response_.count() == 0:
+            item = {
+                "random_id": i.random_id,
+                "alias": i.alias,
+                "avatar_url": i.avatar_url
+            }
+            re.append(item)
     return get_response(ResponseType.SUCCESS, re)
+
+
+def add_collaborator(request):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    users = json.loads(request.GET["users"])
+    random_str = request.GET["project"]
+    admin = User.objects.get(id=request.user.id)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project = response[0]
+    not_found = []
+    success = []
+    already_in = []
+    for i in users:
+        response = User.objects.filter(random_id=i["id"])
+        if response.count() == 0:
+            not_found.append(i)
+            break
+        user = response[0]
+        if i["authority"] != 'rw' and i["authority"] != 'r':
+            return get_response(ResponseType.INVALID_AUTHORITY)
+        response = UserProject.objects.filter(user=user, project=project)
+        if response.count() != 0:
+            already_in.append(i)
+            break
+        response = Invitation.objects.filter(user=user, project=project)
+        if response.count() != 0:
+            for j in response:
+                j.delete()
+        Invitation(admin=admin, user=user, project=project, authority=i["authority"]).save()
+        success.append(i)
+    re = {
+        "not_found": not_found,
+        "success": success,
+        "already_in": already_in
+    }
+    return get_response(ResponseType.SUCCESS, re)
+
+
+def handel_invitation(request):
+    _id = request.GET['id']
+    action = request.GET["action"]
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    user = User.objects.get(id=request.user.id)
+    invitation = Invitation.objects.get(id=_id)
+    if invitation.user != user:
+        return get_response(ResponseType.NO_AUTHORITY)
+    if action == "accept":
+        UserProject(project=invitation.project, user=user, authority=invitation.authority).save()
+    invitation.delete()
+    return get_response(ResponseType.SUCCESS, "Success!")

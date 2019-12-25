@@ -27,8 +27,7 @@ urlpatterns = [
     path('project/create/', views.create_project),
     path('project/create/template/', file_operation.create_from_template),
     path('project/import/', file_operation.import_project),
-    path('project/<str:random_str>/authorize/<str:authority>/', views.authorize_to_other),
-    path('project/authorize/<str:code>/', views.authorize_user),
+    path('project/invite/', views.add_collaborator),
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
     path('project/<str:random_str>/create/document/', views.create_doc),
     path('project/<str:random_str>/document/', views.get_doc_info),
@@ -42,7 +41,6 @@ urlpatterns = [
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),
     path('project/<str:random_str>/rename/file/', file_operation.rename_file),
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),
-    path('project/<str:random_str>/users/current/', views.get_current_users),  #
     path('project/<str:random_str>/<str:filename>/versions/compare/', views.compare_versions),
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
     path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
@@ -51,4 +49,5 @@ urlpatterns = [
     path('project/<str:random_str>/download/', file_operation.download_project),
     path('project/<str:random_str>/delete/', views.delete_project),
     path('user/search/', views.search_user),
+    path('user/invitation/', views.handel_invitation)
 ]

@@ -55,8 +55,13 @@ class User(AbstractUser):
         return get_json(self.get_dict())
 
     def get_dict(self):
-        data = {'random_id': self.random_id, 'alias': self.alias, 'username': self.username, 'password': self.password,
-                'github_id': self.github_id, 'avatar_url': self.avatar_url}
+        responses = Invitation.objects.filter(user=self)
+        lst = []
+        for i in responses:
+            lst.append(i.get_dict())
+        data = {'random_id': self.random_id, 'alias': self.alias, 'username': self.username,
+                'password': self.password, 'github_id': self.github_id,
+                'avatar_url': self.avatar_url, 'invitations': lst}
         return data
 
     def generate_random_id(self):
@@ -182,22 +187,30 @@ class Document(models.Model):
         unique_together = ('project', 'filename')
 
 
-class Authorization(models.Model):
+class Invitation(models.Model):
+    id = models.IntegerField(primary_key=True)
     project = models.ForeignKey('Project', on_delete=models.CASCADE, null=True)
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    code = models.CharField(max_length=30, unique=True)
+    admin = models.ForeignKey('User', on_delete=models.CASCADE, related_name='I_admin')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='I_user')
     date = models.DateTimeField(auto_now=True)
     authority = models.CharField(max_length=2, default='rw', null=False)
-
-    def get_random_code(self):
-        self.code = ''.join(random.sample(string.ascii_letters + string.digits, 30))
-        if Authorization.objects.filter(code=self.code).count() != 0:
-            self.get_random_code()
+    accept = models.CharField(max_length=6, default="wait")
 
     def __str__(self):
-        data = {"id": self.id, "user": self.user.id, "code": self.code, "authority": self.authority,
-                "date": str(self.date)}
-        return get_json(data)
+        return get_json(self.get_dict())
+
+    def get_dict(self):
+        data = {'id': self.id, 'project': self.project.name, 'admin': self.admin.alias, 'admin_avatar': self.admin.avatar_url,
+                'authority': self.authority, 'random_str': self.project.random_str}
+        return data
+
+
+class AuthorityChange(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, null=True)
+    admin = models.ForeignKey('User', on_delete=models.CASCADE, related_name='A_admin')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='A_user')
+    date = models.DateTimeField(auto_now=True)
+    change = models.CharField(max_length=2, default="rm", null=False)
 
 
 class DocumentChange(models.Model):
