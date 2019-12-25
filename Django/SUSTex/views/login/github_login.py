@@ -35,7 +35,9 @@ def complete(request):
     db_response = User.objects.filter(github_id=github_id)
     user = None
     if db_response.count() == 0:
-        User(github_id=github_id, alias=alias, avatar_url=avatar_url).save()
+        user = User(github_id=github_id, alias=alias, avatar_url=avatar_url)
+        user.generate_random_id()
+        user.save()
         print("NONE, put it into DB")
     else:
         print('already exist')

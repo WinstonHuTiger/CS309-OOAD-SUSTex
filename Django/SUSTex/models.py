@@ -44,6 +44,7 @@ def get_json(data: dict):
 
 class User(AbstractUser):
     id = models.AutoField(primary_key=True)
+    random_id = models.IntegerField(unique=True, null=True)
     username = models.CharField(max_length=50, null=True, unique=True)
     password = models.CharField(max_length=50, null=True)
     github_id = models.IntegerField(null=True, db_index=True)
@@ -54,16 +55,26 @@ class User(AbstractUser):
         return get_json(self.get_dict())
 
     def get_dict(self):
-        data = {'id': self.id, 'alias': self.alias, 'username': self.username, 'password': self.password,
+        data = {'random_id': self.random_id, 'alias': self.alias, 'username': self.username, 'password': self.password,
                 'github_id': self.github_id, 'avatar_url': self.avatar_url}
         return data
+
+    def generate_random_id(self):
+        arr = [str(random.randint(1, 9))]
+        arr.extend(random.sample('0123456789', 7))
+        self.random_id = int("".join(arr))
+        response = User.objects.filter(random_id=self.random_id)
+        if response.count() != 0:
+            self.generate_random_id()
 
 
 class Project(models.Model):
     id = models.AutoField(primary_key=True)
+    creator = models.ForeignKey('User', on_delete=models.CASCADE, null=True)
     random_str = models.CharField(max_length=30, null=False, default='####################', unique=True)
     name = models.CharField(max_length=50, null=True)
     last_modify = models.DateTimeField(auto_now=True)
+    template = models.CharField(max_length=50, null=True)
 
     def generate_random_str(self):
         self.random_str = ''.join(random.sample(string.ascii_letters + string.digits, 30))

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Layout, Menu, Icon, Card, Row, Col, Dropdown, Avatar, Popover
-  , Divider, Input, message, Button, Modal, Upload } from 'antd';
+  , Divider, Input, message, Button, Modal, Upload, Tabs } from 'antd';
 import { Link } from 'react-router-dom';
 import NProgress from '../tools/nprogress';
 import copy from 'copy-to-clipboard';
@@ -10,6 +10,7 @@ import axios from 'axios';
 const { Dragger } = Upload;
 const { confirm } = Modal;
 const { SubMenu } = Menu;
+const { TabPane } = Tabs;
 var startTime;
 
 class UserAvatar extends Component {
@@ -394,30 +395,41 @@ class WorkBenchPage extends Component {
       <Layout>
         <Header page='workbench' userInfo={this.state.userInfo} history={this.props.history}/>
         <Layout className="workbench-content">
-          <Menu selectedKeys={["0"]} mode="horizontal" className="workbench-menu">
-            <Menu.Item key="0">
-              <Icon type="project" />
-              Projects
-            </Menu.Item>
-            <Dropdown overlay={
-              <Menu>
-                <Menu.Item onClick={this.emptyProject}>
-                  <Icon type="file" /> Empty Project
-                </Menu.Item>
-                <Menu.Item>
-                  <Link to="/templates/"><Icon type="book" /> Import from Templte</Link>
-                </Menu.Item>
-                <Menu.Item onClick={this.zipProject}>
-                  <Icon type="file-zip" /> Load from Zip File
-                </Menu.Item>
-              </Menu>
-            }
+        <Tabs tabBarExtraContent={
+          <Dropdown overlay={
+            <Menu>
+              <Menu.Item onClick={this.emptyProject}>
+                <Icon type="file" /> Empty Project
+              </Menu.Item>
+              <Menu.Item>
+                <Link to="/templates/"><Icon type="book" /> Import from Templte</Link>
+              </Menu.Item>
+              <Menu.Item onClick={this.zipProject}>
+                <Icon type="file-zip" /> Load from Zip File
+              </Menu.Item>
+            </Menu>
+          }
             trigger={['click']}
             >
               <Button type="primary" shape="round" icon="plus" size={30} id="new-project-btn">
                 Create Project
               </Button>
             </Dropdown>
+          }>
+           <TabPane tab={
+             <><Icon type="project" /><span className="tab-title none-select">Projects</span></>
+           } key="1">
+             <div className="workbench-container">
+               <Row gutter={[24, 24]}>
+                 {projects}
+               </Row>
+             </div>
+           </TabPane>
+           <TabPane tab={
+             <><Icon type="project" /><span className="tab-title none-select">Invitations</span></>
+           } key="2">
+           </TabPane>
+           </Tabs>
             <Modal
               title="New Project"
               visible={this.state.emptyProject}
@@ -450,12 +462,6 @@ class WorkBenchPage extends Component {
                 </p>
               </Dragger>
             </Modal>
-          </Menu>
-          <div className="workbench-container">
-            <Row gutter={[24, 24]}>
-              {projects}
-            </Row>
-          </div>
         </Layout>
       </Layout>
     );

@@ -66,7 +66,8 @@ class UserAvatar extends Component {
         {this.props.userInfo != null ? (
           <Dropdown overlay={
             <Menu className="dropdown-menu">
-                <li className="dropdown-li none-select">Hello, <b>{this.props.userInfo["alias"]}</b></li>
+                <li className="dropdown-li none-select grey">Hello, <b>{this.props.userInfo["alias"]}</b></li>
+                <li className="dropdown-li grey">ID: <span className="user-id">{this.props.userInfo["random_id"]}</span></li>
                 <Menu.Divider />
                 <Menu.Item onClick={this.logout}><span className="grey" style={{fontSize: "15px"}}>Sign out</span></Menu.Item>
             </Menu>

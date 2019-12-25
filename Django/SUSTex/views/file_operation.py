@@ -233,7 +233,7 @@ def import_project(request):
         file = request.FILES.get('file')
         zf = zipfile.ZipFile(file)
         user = User.objects.get(id=request.user.id)
-        project = Project(name=str(file).split(".")[0])
+        project = Project(name=str(file).split(".")[0], creator=user)
         project.generate_random_str()
         project.create_project_path()
         project_path = os.path.join(USER_FILES_DIR, project.random_str)
@@ -250,14 +250,19 @@ def import_project(request):
 def create_from_template(request):
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
-    project_name = request.GET["name"]
     category = request.GET["category"]
     title = request.GET["title"]
     folder_path = os.path.join(BASE_DIR, 'static/LaTex')
     folder_path = os.path.join(folder_path, category)
     folder_path = os.path.join(folder_path, title)
     user = User.objects.get(id=request.user.id)
-    project = Project(name=project_name)
+    template = category + ", " + title
+    response = Project.objects.filter(creator=user, template=template)
+    if response.count() == 0:
+        project_name = title + "-Template"
+    else:
+        project_name = title + "-Template" + "(%d)" % response.count()
+    project = Project(creator=user, name=project_name, template=template)
     project.generate_random_str()
     project.create_project_path()
     project_path = os.path.join(USER_FILES_DIR, project.random_str)

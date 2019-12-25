@@ -376,7 +376,7 @@ html, body {
 
 #new-project-btn {
   float: right;
-  margin: 8px 15px 0 0;
+  margin: 8px 20px 0 0;
 }
 
 .grey {
@@ -385,4 +385,13 @@ html, body {
 
 .ant-modal-content .anticon-download {
   display: none;
+}
+
+.tab-title {
+  font-size: 15px;
+  font-weight: 400 !important;
+}
+
+.user-id {
+  font-weight: 500;
 }

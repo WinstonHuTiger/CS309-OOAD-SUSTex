@@ -86,33 +86,16 @@ class TemplateCard extends Component {
     })
   }
 
-  emptyProject = () => {
-    this.setState({
-      emptyProject: true
-    });
-  }
-
-  emptyCancel = () => {
-    this.setState({
-      emptyProject: false
-    });
-  }
-
   componentDidMount() {
     this.setState({
       loading: false
     })
   }
 
-  emptyOk = () => {
-    if (this.state.nameValue == null || this.state.nameValue == "") {
-      message.error("Project name is empty!");
-      return;
-    }
+  importTemplate = () => {
     const _this = this;
     axios.get(window.url + '/project/create/template/',{
       params: {
-        name: this.state.nameValue,
         category: this.state.category,
         title: this.state.title,
       }
@@ -126,18 +109,12 @@ class TemplateCard extends Component {
       }
     })
     .catch((error) => {
-      console.log(error);
+      message.error("Server Error!");
     });
     this.setState({
       emptyProject: false,
       nameValue: null
     });
-  }
-
-  inputName = ({ target: { value } }) => {
-    this.setState({
-      nameValue: value
-    })
   }
 
   render() {
@@ -161,7 +138,7 @@ class TemplateCard extends Component {
                   href={this.state.path + '/main.pdf'} target="_blank">
                   View PDF
                 </Button>
-                <Button shape="round" icon="project" size="medium" onClick={this.emptyProject}>
+                <Button shape="round" icon="project" size="medium" onClick={this.importTemplate}>
                   Import
                 </Button>
               </div>
@@ -176,18 +153,6 @@ class TemplateCard extends Component {
             </>} />
           </Card>
         </Row>
-        <Modal
-          title="New Project"
-          visible={this.state.emptyProject}
-          onOk={this.emptyOk}
-          onCancel={this.emptyCancel}
-        >
-          <Input placeholder="name"
-            value={this.state.nameValue}
-            onChange={this.inputName}
-            onPressEnter={this.emptyOk}
-            autoFocus/>
-        </Modal>
       </div>
     );
   }

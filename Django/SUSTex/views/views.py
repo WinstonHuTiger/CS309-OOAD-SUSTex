@@ -111,7 +111,7 @@ def create_project(request):
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     user = User.objects.filter(id=request.user.id)[0]
-    project = Project(name=project_name)
+    project = Project(name=project_name, creator=user)
     project.generate_random_str()
     project.create_project_path()
     project.save()
@@ -353,3 +353,4 @@ def delete_project(request, random_str):
         return get_response(ResponseType.DELETE_ERROR)
     project.delete()
     return get_response(ResponseType.SUCCESS, "Delete Project Successfully!")
+
