@@ -2,11 +2,9 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from SUSTex.models import User
 from django.contrib import auth
-import socket
 import requests
-from django.views.decorators.csrf import csrf_protect
 
-IP = "127.0.0.1"
+IP = "10.17.61.29"
 PORT = 8000
 FRONT_PORT = 3000
 LOGIN_SCOPE = 'read:user'

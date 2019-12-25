@@ -247,7 +247,8 @@ class ProjectCard extends Component {
     key: 0,
     manageVisible: false,
     changes: new Array(this.props.projectInfo.length),
-    radioKey: 0
+    radioKey: 0,
+    hover: false
   }
 
   onMouseEnter = () => {
@@ -466,6 +467,18 @@ class ProjectCard extends Component {
     });
   }
 
+  mouseEnter = () => {
+    this.setState({
+      hover: true
+    });
+  }
+
+  mouseLeave = () => {
+    this.setState({
+      hover: false
+    });
+  }
+
   render() {
     const _this = this;
     const users = this.props.projectInfo["users"].map((item, index) =>
@@ -474,7 +487,8 @@ class ProjectCard extends Component {
       </span>
     );
     const userItems = this.props.projectInfo["users"].map((item, index) => {
-      if (item["id"] == this.props.userInfo["random_id"]) {
+      console.log(item)
+      if (item["id"] == this.props.userInfo["random_id"] || item["type"] == "Creator") {
         return null;
       }
       return <UserRadio
@@ -484,7 +498,7 @@ class ProjectCard extends Component {
       index={index}/>
     });
     return(
-      <Col span={6}>
+      <Col span={6} onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave}>
         <Dropdown overlay={
           <Menu className="project-card-menu">
             <Menu.Item key="1" onClick={this.renameStart}><Icon type="edit" />Rename</Menu.Item>
@@ -531,6 +545,9 @@ class ProjectCard extends Component {
               <div className="align-right none-select"><Icon type="clock-circle" /> Last Modify</div>
               <div className="align-right none-select">{this.props.projectInfo["last_modify"].split('.')[0]}</div>
             </div>
+            <Button className={this.state.hover?("project-card-open show"):("project-card-open")}>
+              <Link to={"/project/" + this.props.projectInfo["project"] + "/"}>Open</Link>
+            </Button>
           </div>
          </Card>
        </Dropdown>
@@ -854,7 +871,8 @@ class WorkBenchPage extends Component {
       <ProjectCard
           projectInfo={item}
           updateProjectInfo={this.updateProjectInfo}
-          userInfo={this.state.userInfo}/>);
+          userInfo={this.state.userInfo}/>
+      );
     return(
       <Layout>
         <Header page='workbench' userInfo={this.state.userInfo} history={this.props.history}/>

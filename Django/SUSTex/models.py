@@ -164,6 +164,7 @@ class UserProject(models.Model):
         return get_json(data)
 
     def get_dict(self):
+        print("HERE")
         return {"name": self.project.name, "project": self.project.random_str, "authority": self.authority,
                 "last_modify": str(self.project.last_modify),
                 "users": self.project.get_users()}
