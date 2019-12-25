@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Layout, Menu, Icon, Card, Row, Col, Dropdown, Avatar, Popover
-  , Divider, Input, message, Button, Modal, Upload, Tabs } from 'antd';
+  , Divider, Input, message, Button, Modal, Upload, Tabs, Transfer
+  , Select } from 'antd';
 import { Link } from 'react-router-dom';
 import NProgress from '../tools/nprogress';
 import copy from 'copy-to-clipboard';
@@ -11,7 +12,166 @@ const { Dragger } = Upload;
 const { confirm } = Modal;
 const { SubMenu } = Menu;
 const { TabPane } = Tabs;
+const { Option } = Select;
 var startTime;
+
+class PrioritySelect extends Component {
+  state = {
+    priority: "Read & Write"
+  }
+
+  handleParentClick = (e) => {
+    e.stopPropagation();
+  }
+
+  clickItem = (e) => {
+    let val = e.key == "rw" ? "Read & Write" : "Read Only";
+    this.setState({
+      priority: val
+    })
+    this.props.updatePriority(this.props.mapKey, e.key);
+  }
+
+  render() {
+    return(
+      <span onClick={this.handleParentClick}>
+        <Dropdown overlay={
+          <Menu>
+           <Menu.Item onClick={this.clickItem} key="rw">
+             Read & Write
+           </Menu.Item>
+           <Menu.Item onClick={this.clickItem} key="r">
+             Read Only
+           </Menu.Item>
+          </Menu>
+        }
+        className="invite-priority-dropdown"
+        >
+          <span>
+            {this.state.priority}<Icon type="down" />
+          </span>
+        </Dropdown>
+      </span>
+    );
+  }
+}
+
+class UserInviteTransfer extends Component {
+  state = {
+    mockData: [],
+    targetKeys: [],
+    priority: "rw"
+  };
+
+  filterOption = (inputValue, option) => {
+    console.log(option.key)
+    let inArr = false;
+    let i;
+    for (i = 0; i < this.state.targetKeys.length; i++) {
+      if (this.state.targetKeys[i] == option.key) {
+        inArr = true;
+        break;
+      }
+    }
+    return option.key.indexOf(inputValue) > -1 || inArr;
+  };
+
+  handleChange = targetKeys => {
+    this.setState({ targetKeys });
+  };
+
+  updatePriority = (key, val) => {
+    let arr = this.state.mockData;
+    let i;
+    for (i = 0; i < arr.length; i++) {
+      if (arr[i]["key"] == key) {
+        arr[i]["priority"] = val;
+      }
+    }
+    this.setState({
+      mockData: arr
+    });
+  }
+
+  handleSearch = (dir, value) => {
+    const _this = this;
+    axios.get(window.url + '/user/search/',{
+      params: {
+        random_id: value
+      }
+    })
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        let users = msg.data["message"]
+        let i;
+        let mockData = []
+        for (i = 0; i < this.state.mockData.length; i++) {
+          let key = this.state.mockData[i].key;
+          if (this.state.targetKeys.includes(key)) {
+            mockData.push(this.state.mockData[i]);
+          }
+        }
+        for (i = 0; i < users.length; i++) {
+          let user = {
+            key: users[i]["random_id"].toString(),
+            title: (
+                <>
+                  <span className="invite-user-id">ID: {users[i]["random_id"]}</span>
+                  <Avatar
+                  shape="square"
+                  size="small"
+                  icon="user"
+                  src={users[i]["avatar_url"]}
+                  className="invite-user-avatar"/>
+                  <span className="invite-user-alias">{users[i]["alias"]}</span>
+                  <PrioritySelect mapKey={users[i]["random_id"].toString()} updatePriority={this.updatePriority}/>
+                </>
+            ),
+            chosen: false,
+            priority: "rw"
+          }
+          mockData.push(user);
+        }
+        console.log(mockData)
+        _this.setState({
+          mockData: mockData
+        });
+        console.log(this.state)
+      } else if (msg.data["code"] == 2) {
+         message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+         setTimeout(() => {
+           window.location.reload();
+         }, 300);
+      } else {
+        message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+      }
+    })
+    .catch((error) => {
+      message.error("Opps, server encounter internal error.");
+      console.log(error);
+    });
+
+  };
+
+  render() {
+    return (
+      <Transfer
+        dataSource={this.state.mockData}
+        showSearch
+        filterOption={this.filterOption}
+        targetKeys={this.state.targetKeys}
+        onChange={this.handleChange}
+        onSearch={this.handleSearch}
+        render={item => item.title}
+        showSelectAll={false}
+        listStyle={{
+          width: 350,
+          height: 300,
+        }}
+      />
+    );
+  }
+}
 
 class UserAvatar extends Component {
   render() {
@@ -35,7 +195,9 @@ class UserAvatar extends Component {
 class ProjectCard extends Component {
   state = {
     hover: false,
-    rename: false
+    rename: false,
+    inviteVisiable: false,
+    inviteLoading: false,
   }
 
   onMouseEnter = () => {
@@ -122,6 +284,18 @@ class ProjectCard extends Component {
    });
   }
 
+  showInvite = () => {
+    this.setState({
+      inviteVisiable: true
+    });
+  }
+
+  inviteCancel = () => {
+    this.setState({
+      inviteVisiable: false
+    });
+  }
+
   render() {
     const users = this.props.projectInfo["users"].map((item, index) =>
       <UserAvatar userInfo={item}/>
@@ -133,7 +307,7 @@ class ProjectCard extends Component {
             <Menu.Item key="1" onClick={this.renameStart}><Icon type="edit" />Rename</Menu.Item>
             <Menu.Item key="2" onClick={this.deleteProject}><Icon type="delete" />Delete</Menu.Item>
             <Menu.Divider />
-            <Menu.Item key="3"><Icon type="user-add" />Invite</Menu.Item>
+            <Menu.Item key="3" onClick={this.showInvite}><Icon type="user-add" />Invite</Menu.Item>
             <Menu.Item key="4" onClick={this.copyUrl}><Icon type="share-alt" />Copy URL</Menu.Item>
             <Menu.Item key="5" onClick={this.downloadProject}>
               <a href={window.url + '/project/' + this.props.projectInfo["project"] + '/download/'} target="_blank"><Icon type="download" />Download</a>
@@ -174,6 +348,23 @@ class ProjectCard extends Component {
           </div>
          </Card>
        </Dropdown>
+       <Modal
+         visible={this.state.inviteVisiable}
+         title="Add Collaborators into You Project"
+         onOk={this.inviteOk}
+         onCancel={this.inviteCancel}
+         width={800}
+         footer={[
+           <Button key="back" onClick={this.inviteCancel}>
+             Return
+           </Button>,
+           <Button key="submit" type="primary" loading={this.state.inviteLoading} onClick={this.inviteOk}>
+             Submit
+           </Button>,
+         ]}
+       >
+         <UserInviteTransfer />
+       </Modal>
       </Col>
     );
   }
@@ -426,7 +617,7 @@ class WorkBenchPage extends Component {
              </div>
            </TabPane>
            <TabPane tab={
-             <><Icon type="project" /><span className="tab-title none-select">Invitations</span></>
+             <><Icon type="usergroup-add" /><span className="tab-title none-select">Invitations</span></>
            } key="2">
            </TabPane>
            </Tabs>

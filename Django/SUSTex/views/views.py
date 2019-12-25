@@ -354,3 +354,20 @@ def delete_project(request, random_str):
     project.delete()
     return get_response(ResponseType.SUCCESS, "Delete Project Successfully!")
 
+
+def search_user(request):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    random_id = request.GET["random_id"]
+    if random_id == "":
+        return get_response(ResponseType.SUCCESS, [])
+    response = User.objects.filter(random_id__regex=r'^%s[0-9]*$' % random_id)
+    re = []
+    for i in response:
+        item = {
+            "random_id": i.random_id,
+            "alias": i.alias,
+            "avatar_url": i.avatar_url
+        }
+        re.append(item)
+    return get_response(ResponseType.SUCCESS, re)

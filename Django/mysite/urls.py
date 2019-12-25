@@ -50,4 +50,5 @@ urlpatterns = [
     path('templates/latex/', views.get_latex_templates),
     path('project/<str:random_str>/download/', file_operation.download_project),
     path('project/<str:random_str>/delete/', views.delete_project),
+    path('user/search/', views.search_user),
 ]
