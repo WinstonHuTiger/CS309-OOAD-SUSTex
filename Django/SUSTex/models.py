@@ -141,10 +141,12 @@ class Project(models.Model):
     def get_users(self):
         lst = []
         creator = UserProject.objects.get(project=self, type="Creator")
-        lst.append({"alias": creator.user.alias, "authority": creator.authority, "type": "Creator", "avatar_url": creator.user.avatar_url})
+        lst.append({"id": creator.user.random_id, "alias": creator.user.alias, "authority": creator.authority,
+                    "type": "Creator", "avatar_url": creator.user.avatar_url})
         response = UserProject.objects.filter(project=self, type="Member")
         for i in response:
-            lst.append({"alias": i.user.alias, "authority": i.authority, "type": i.type, "avatar_url": i.user.avatar_url})
+            lst.append({"id": i.user.random_id, "alias": i.user.alias, "authority": i.authority,
+                        "type": i.type, "avatar_url": i.user.avatar_url})
         return lst
 
 
@@ -162,7 +164,8 @@ class UserProject(models.Model):
         return get_json(data)
 
     def get_dict(self):
-        return {"name": self.project.name, "project": self.project.random_str, "last_modify": str(self.project.last_modify),
+        return {"name": self.project.name, "project": self.project.random_str, "authority": self.authority,
+                "last_modify": str(self.project.last_modify),
                 "users": self.project.get_users()}
 
 

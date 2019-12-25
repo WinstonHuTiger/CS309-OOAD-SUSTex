@@ -326,6 +326,11 @@ html, body {
   font-size: 20px;
   font-weight: 400;
   color: #0d1a26;
+  word-break:keep-all;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:block;
 }
 
 .card .ant-card-head-title, .card-hover .ant-card-head-title {
@@ -401,11 +406,49 @@ html, body {
   margin-top: 2px;
 }
 
-.invite-priority-dropdown {
+.invite-authority-dropdown {
   float: right;
+  margin-left: 5px;
 }
 
 .invite-user-id {
   font-size: 13px;
   margin-right: 10px;
+}
+
+.message-list {
+  padding: 10px 40px;
+  background: #fff;
+}
+
+.invitation-des {
+  margin-left: 6px;
+}
+
+.ant-btn-danger {
+  background-color: #ff4d4fcf !important;
+  border-color: #ff4d4fb3 !important;
+}
+
+.project-card-avatar {
+  padding-right: 5px;
+}
+
+.manage-item {
+  border-bottom: 1px solid rgb(232, 232, 232);
+  padding: 5px 10px;
+}
+
+.manage-user-alias {
+  margin-left: 10px;
+  font-size: 15px;
+}
+
+.manage-checkbox {
+  float: right;
+  margin-top: 5px;
+}
+
+.remove-btn {
+  width: 65px;
 }

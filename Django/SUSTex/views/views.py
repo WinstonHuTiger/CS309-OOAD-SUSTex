@@ -389,3 +389,32 @@ def handel_invitation(request):
         UserProject(project=invitation.project, user=user, authority=invitation.authority).save()
     invitation.delete()
     return get_response(ResponseType.SUCCESS, "Success!")
+
+
+def change_authority(request):
+    print(request.GET)
+    random_str = request.GET["project"]
+    users = json.loads(request.GET["users"])
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project = response[0]
+    for i in users:
+        random_id = i["id"]
+        authority = i["authority"]
+        response = User.objects.filter(random_id=random_id)
+        if response.count() == 0:
+            return get_response(ResponseType.USER_NOT_FOUND)
+        user = response[0]
+        response = UserProject.objects.filter(project=project, user=user)
+        if response.count() == 0:
+            return get_response(ResponseType.NOT_IN_PROJECT)
+        user_project = response[0]
+        if authority == "remove":
+            user_project.delete()
+        else:
+            user_project.authority = authority
+            user_project.save()
+    return get_response(ResponseType.SUCCESS, "Change authority successfully!")

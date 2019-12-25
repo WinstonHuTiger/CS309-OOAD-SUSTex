@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Layout, Menu, Icon, Card, Row, Col, Dropdown, Avatar, Popover
   , Divider, Input, message, Button, Modal, Upload, Tabs, Transfer
-  , Select } from 'antd';
+  , Select, List, notification, Radio } from 'antd';
 import { Link } from 'react-router-dom';
 import NProgress from '../tools/nprogress';
 import copy from 'copy-to-clipboard';
@@ -15,9 +15,9 @@ const { TabPane } = Tabs;
 const { Option } = Select;
 var startTime;
 
-class PrioritySelect extends Component {
+class AuthoritySelect extends Component {
   state = {
-    priority: "Read & Write"
+    authority: "Read & Write"
   }
 
   handleParentClick = (e) => {
@@ -27,9 +27,9 @@ class PrioritySelect extends Component {
   clickItem = (e) => {
     let val = e.key == "rw" ? "Read & Write" : "Read Only";
     this.setState({
-      priority: val
+      authority: val
     })
-    this.props.updatePriority(this.props.mapKey, e.key);
+    this.props.updateAuthority(this.props.mapKey, e.key);
   }
 
   render() {
@@ -45,10 +45,10 @@ class PrioritySelect extends Component {
            </Menu.Item>
           </Menu>
         }
-        className="invite-priority-dropdown"
+        className="invite-authority-dropdown"
         >
           <span>
-            {this.state.priority}<Icon type="down" />
+            {this.state.authority}<Icon type="down" />
           </span>
         </Dropdown>
       </span>
@@ -59,12 +59,10 @@ class PrioritySelect extends Component {
 class UserInviteTransfer extends Component {
   state = {
     mockData: [],
-    targetKeys: [],
-    priority: "rw"
+    targetKeys: []
   };
 
   filterOption = (inputValue, option) => {
-    console.log(option.key)
     let inArr = false;
     let i;
     for (i = 0; i < this.state.targetKeys.length; i++) {
@@ -77,15 +75,17 @@ class UserInviteTransfer extends Component {
   };
 
   handleChange = targetKeys => {
-    this.setState({ targetKeys });
+    this.setState({ targetKeys }, () => {
+      this.props.updateInfo(this.state.mockData, this.state.targetKeys);
+    });
   };
 
-  updatePriority = (key, val) => {
+  updateAuthority = (key, val) => {
     let arr = this.state.mockData;
     let i;
     for (i = 0; i < arr.length; i++) {
       if (arr[i]["key"] == key) {
-        arr[i]["priority"] = val;
+        arr[i]["authority"] = val;
       }
     }
     this.setState({
@@ -97,7 +97,8 @@ class UserInviteTransfer extends Component {
     const _this = this;
     axios.get(window.url + '/user/search/',{
       params: {
-        random_id: value
+        user: value,
+        project: this.props.project
       }
     })
     .then((msg) => {
@@ -124,11 +125,12 @@ class UserInviteTransfer extends Component {
                   src={users[i]["avatar_url"]}
                   className="invite-user-avatar"/>
                   <span className="invite-user-alias">{users[i]["alias"]}</span>
-                  <PrioritySelect mapKey={users[i]["random_id"].toString()} updatePriority={this.updatePriority}/>
+                  <AuthoritySelect mapKey={users[i]["random_id"].toString()} updateAuthority={this.updateAuthority}/>
                 </>
             ),
             chosen: false,
-            priority: "rw"
+            authority: "rw",
+            alias: users[i]["alias"]
           }
           mockData.push(user);
         }
@@ -136,7 +138,6 @@ class UserInviteTransfer extends Component {
         _this.setState({
           mockData: mockData
         });
-        console.log(this.state)
       } else if (msg.data["code"] == 2) {
          message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
          setTimeout(() => {
@@ -150,7 +151,6 @@ class UserInviteTransfer extends Component {
       message.error("Opps, server encounter internal error.");
       console.log(error);
     });
-
   };
 
   render() {
@@ -192,12 +192,62 @@ class UserAvatar extends Component {
   }
 }
 
+class UserRadio extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: this.props.userInfo["authority"],
+      disabled: false
+    }
+  }
+
+  onChange = (event) => {
+    this.setState({
+      value: event.target.value,
+    });
+    if (event.target.value != this.props.userInfo["authority"]) {
+      this.props.setChange(this.props.index, event.target.value);
+    } else {
+      this.props.setChange(this.props.index, undefined);
+    }
+  }
+
+  remove = () => {
+    this.setState({
+      disabled: !this.state.disabled
+    },() => this.props.setChange(this.props.index, "remove"));
+  }
+
+  render() {
+    const item = this.props.userInfo;
+    return(
+      <div className="manage-item">
+        <Avatar src={item["avatar_url"]} />
+        <span className="manage-user-alias">{item["alias"]}</span>
+        <span className="manage-checkbox">
+          <Radio.Group onChange={this.onChange} value={this.state.value}>
+            <Radio value={'rw'} disabled={this.state.disabled}>Read & Write</Radio>
+            <Radio value={'r'} disabled={this.state.disabled}>Read Only</Radio>
+          </Radio.Group>
+          <Button className="remove-btn" type="danger" size="small" onClick={this.remove}>{this.state.disabled ? "Undo" : "Remove"}</Button>
+        </span>
+      </div>
+    );
+  }
+}
+
 class ProjectCard extends Component {
   state = {
     hover: false,
     rename: false,
     inviteVisiable: false,
     inviteLoading: false,
+    mockData: [],
+    targetKeys: [],
+    key: 0,
+    manageVisible: false,
+    changes: new Array(this.props.projectInfo.length),
+    radioKey: 0
   }
 
   onMouseEnter = () => {
@@ -290,16 +340,149 @@ class ProjectCard extends Component {
     });
   }
 
+  inviteOk = () => {
+    let i;
+    let lst = [];
+    let mockData = this.state.mockData;
+    let targetKeys = this.state.targetKeys;
+    if (mockData.length == 0) {
+      message.warn("User list is empty!");
+    } else {
+      for (i = 0; i < mockData.length; i++) {
+        if (targetKeys.includes(mockData[i].key)) {
+          lst.push({
+            id: mockData[i]["key"],
+            authority: mockData[i]["authority"],
+            alias: mockData[i]["alias"]
+          });
+        }
+      }
+      const _this = this;
+      axios.get(window.url + '/project/invite/', {
+        params: {
+          project: this.props.projectInfo["project"],
+          users: JSON.stringify(lst)
+        }
+      })
+      .then((msg) => {
+        if (msg.data["code"] == 1) {
+          let arr = msg.data["message"]["success"];
+          let i;
+          for (i = 0; i < arr.length; i++) {
+            message.success("Invite user " + arr[i]["alias"] + "(" + arr[i]["id"] + ") successfully!");
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+      _this.setState({
+        inviteVisiable: false,
+        key: this.state.key + 1,
+        mockData: [],
+        targetKeys: []
+      });
+    }
+  }
+
   inviteCancel = () => {
     this.setState({
-      inviteVisiable: false
+      inviteVisiable: false,
+      key: this.state.key + 1,
+      mockData: [],
+      targetKeys: []
+    });
+  }
+
+  updateInfo = (mockData, targetKeys) => {
+    this.setState({
+      mockData: mockData,
+      targetKeys: targetKeys
+    });
+  }
+
+  manageAuthority = () => {
+    this.setState({
+      manageVisible: true
+    });
+  }
+
+  manageOk = () => {
+    this.setState({
+      manageVisible: false
+    });
+    let re = [];
+    let i;
+    for (i = 0; i < this.state.changes.length; i++) {
+      if (this.state.changes[i] != undefined) {
+        let item = this.props.projectInfo["users"][i];
+        re.push({
+          "id": item["id"],
+          "authority": this.state.changes[i],
+        });
+      }
+    }
+    if (re.length != 0) {
+      axios.get(window.url + "/project/authority/", {
+        params: {
+          "project": this.props.projectInfo["project"],
+          "users": JSON.stringify(re)
+        }
+      })
+      .then((msg) => {
+        if (msg.data["code"] == 1) {
+          message.success("Change project authority successfully!");
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        } else if (msg.data["code"] == 2) {
+          message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        } else {
+          message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+        }
+      })
+      .catch((error) => {
+        message.error("Server internal error!")
+      });
+    }
+  }
+
+  manageCancel = () => {
+    this.setState({
+      manageVisible: false,
+      radioKey: this.state.radioKey + 1,
+      changes: new Array(this.props.projectInfo["users"].length)
+    });
+  }
+
+  setChange = (index, val) => {
+    let arr = this.state.changes;
+    arr[index] = val;
+    this.setState({
+      changes: arr
     });
   }
 
   render() {
+    const _this = this;
     const users = this.props.projectInfo["users"].map((item, index) =>
-      <UserAvatar userInfo={item}/>
+      <span className="project-card-avatar">
+        <UserAvatar userInfo={item}/>
+      </span>
     );
+    const userItems = this.props.projectInfo["users"].map((item, index) => {
+      if (item["id"] == this.props.userInfo["random_id"]) {
+        return null;
+      }
+      return <UserRadio
+      userInfo={item}
+      key={_this.state.radioKey}
+      setChange={this.setChange}
+      index={index}/>
+    });
     return(
       <Col span={6}>
         <Dropdown overlay={
@@ -308,8 +491,11 @@ class ProjectCard extends Component {
             <Menu.Item key="2" onClick={this.deleteProject}><Icon type="delete" />Delete</Menu.Item>
             <Menu.Divider />
             <Menu.Item key="3" onClick={this.showInvite}><Icon type="user-add" />Invite</Menu.Item>
-            <Menu.Item key="4" onClick={this.copyUrl}><Icon type="share-alt" />Copy URL</Menu.Item>
-            <Menu.Item key="5" onClick={this.downloadProject}>
+            {this.props.projectInfo["authority"] == "rw" ?
+            (<Menu.Item key="4" onClick={this.manageAuthority}><Icon type="contacts" />Management</Menu.Item>)
+            : (null)}
+            <Menu.Item key="5" onClick={this.copyUrl}><Icon type="share-alt" />Copy URL</Menu.Item>
+            <Menu.Item key="6" onClick={this.downloadProject}>
               <a href={window.url + '/project/' + this.props.projectInfo["project"] + '/download/'} target="_blank"><Icon type="download" />Download</a>
             </Menu.Item>
           </Menu>
@@ -363,9 +549,82 @@ class ProjectCard extends Component {
            </Button>,
          ]}
        >
-         <UserInviteTransfer />
+         <UserInviteTransfer
+         key={this.state.key}
+         updateInfo={this.updateInfo}
+         project={this.props.projectInfo["project"]}/>
        </Modal>
+       <Modal
+          title="Manage Project"
+          visible={this.state.manageVisible}
+          onOk={this.manageOk}
+          onCancel={this.manageCancel}
+          width={500}
+        >
+          {userItems}
+        </Modal>
       </Col>
+    );
+  }
+}
+
+class InvitationNotification extends Component {
+  replyInvitation = (val) => {
+    const _this = this;
+    axios.get(window.url + '/user/invitation/', {
+      params: {
+        id: this.props.invitation['id'],
+        action: val
+      }
+    })
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        if (val == "accept") {
+          message.success("Accept invitation!");
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        } else {
+          message.success("Refuse invitation!");
+        }
+      } else if (msg.data["code"] == 2) {
+        message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
+      } else {
+        message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
+  acceptInvitation = () => {
+    this.replyInvitation("accept");
+  }
+
+  refuseInvitation = () => {
+    this.replyInvitation("refuse");
+  }
+
+  render() {
+    const item = this.props.invitation;
+    return(
+      <div>
+        <Avatar src={item["admin_avatar"]} size="small"/>
+        <span className="invitation-des">
+          <span className="grey">{item['admin']}</span> invite you to join
+          their project: <span className="grey">{item['project']}</span>.
+        </span>
+        <div>
+          <div style={{float: "right"}}>
+           <Button size="small" style={{marginRight: "5px"}} onClick={this.acceptInvitation}>Accept</Button>
+           <Button size="small" type="danger" onClick={this.refuseInvitation}>Refuse</Button>
+          </div>
+        </div>
+      </div>
     );
   }
 }
@@ -424,6 +683,19 @@ class WorkBenchPage extends Component {
         _this.setState({
           userInfo: msg.data["message"]
         });
+        let j;
+        for (j = 0; j < msg.data["message"]["invitations"].length; j++) {
+          let item = msg.data["message"]["invitations"][j];
+          const args = {
+            message: 'New Invitation',
+            description:
+              (
+                 <InvitationNotification invitation={item} updateProjectInfo={this.updateProjectInfo}/>
+              ),
+            duration: 0,
+          };
+          notification.open(args);
+        }
         if (_this.props.match.path == "/workbench/login/") {
           message.success("Login Successfully!");
           _this.props.history.push("/workbench/");
@@ -502,7 +774,6 @@ class WorkBenchPage extends Component {
   }
 
   onFileChange = (info) => {
-    console.log(info);
     let re = [info.file];
     const { status } = info.file;
     if (status == "removed"){
@@ -580,8 +851,10 @@ class WorkBenchPage extends Component {
 
   render() {
     const projects = this.state.projectsInfo.map((item, index) =>
-      <ProjectCard projectInfo={item} updateProjectInfo={this.updateProjectInfo}/>
-    );
+      <ProjectCard
+          projectInfo={item}
+          updateProjectInfo={this.updateProjectInfo}
+          userInfo={this.state.userInfo}/>);
     return(
       <Layout>
         <Header page='workbench' userInfo={this.state.userInfo} history={this.props.history}/>
@@ -615,10 +888,6 @@ class WorkBenchPage extends Component {
                  {projects}
                </Row>
              </div>
-           </TabPane>
-           <TabPane tab={
-             <><Icon type="usergroup-add" /><span className="tab-title none-select">Invitations</span></>
-           } key="2">
            </TabPane>
            </Tabs>
             <Modal
@@ -658,5 +927,28 @@ class WorkBenchPage extends Component {
     );
   }
 }
+
+// <TabPane tab={
+//   <><Icon type="message" /><span className="tab-title none-select">Message</span></>
+// } key="2">
+//   <Layout className="message-list">
+//     <List itemLayout="horizontal">
+//       <List.Item className="message-list-item">
+//         <List.Item.Meta
+//           avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+//           title={<a href="https://ant.design">HERE</a>}
+//           description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+//         />
+//       </List.Item>
+//       <List.Item>
+//         <List.Item.Meta
+//           avatar={<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />}
+//           title={<a href="https://ant.design">HERE</a>}
+//           description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+//         />
+//       </List.Item>
+//     </List>
+//     </Layout>
+// </TabPane>
 
 export default WorkBenchPage;

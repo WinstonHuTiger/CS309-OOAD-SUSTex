@@ -28,6 +28,7 @@ urlpatterns = [
     path('project/create/template/', file_operation.create_from_template),
     path('project/import/', file_operation.import_project),
     path('project/invite/', views.add_collaborator),
+    path('project/authority/', views.change_authority),
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
     path('project/<str:random_str>/create/document/', views.create_doc),
     path('project/<str:random_str>/document/', views.get_doc_info),
