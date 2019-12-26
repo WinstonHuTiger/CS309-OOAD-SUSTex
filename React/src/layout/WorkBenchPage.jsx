@@ -250,7 +250,7 @@ class ProjectCard extends Component {
     hover: false
   }
 
-  changes = new Array(this.props.projectInfo.length);
+  changes = new Array(this.props.projectInfo["users"].length);
 
   onMouseEnter = () => {
     this.setState({
