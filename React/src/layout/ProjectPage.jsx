@@ -397,7 +397,7 @@ class Folder extends Component {
     const item = this.props.item;
     return(
       <>
-        <ContextMenuTrigger id="folder"
+        <ContextMenuTrigger id={item["path"] + "-folder"}
         attributes={{'path': item["path"], 'project': this.props.project}}>
           <div>
             <span className="none-select">
@@ -413,7 +413,7 @@ class Folder extends Component {
             </span>
           </div>
         </ContextMenuTrigger>
-        <ContextMenu id="folder" className="contextMenu">
+        <ContextMenu id={item["path"] + "-folder"} className="contextMenu">
           <FolderContextMenu updateProjectInfo={this.props.updateProjectInfo}
           updateRename={this.updateRename}/>
         </ContextMenu>

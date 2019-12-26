@@ -14,6 +14,7 @@ class FileContextMenu extends Component {
   }
 
   deleteFolder = (e, data, target) => {
+    console.log("HERE");
     e.stopPropagation();
     let path = target.getAttribute('path');
     let project = target.getAttribute('project');
@@ -69,20 +70,6 @@ class FileContextMenu extends Component {
         <MenuItem data={{foo: 'bar'}} onClick={this.handleClick}>
           <Menu selectable={false}>
             <Menu.Item key="0" className="none-select">
-              <Icon type="copy" />Copy
-            </Menu.Item>
-          </Menu>
-        </MenuItem>
-        <MenuItem data={{foo: 'bar'}} onClick={this.handleClick}>
-          <Menu selectable={false}>
-            <Menu.Item key="0" className="none-select">
-              <Icon type="save" />Paste
-            </Menu.Item>
-          </Menu>
-        </MenuItem>
-        <MenuItem data={{foo: 'bar'}} onClick={this.handleClick}>
-          <Menu selectable={false}>
-            <Menu.Item key="0" className="none-select">
               <Icon type="profile" />Property
             </Menu.Item>
           </Menu>
@@ -91,5 +78,13 @@ class FileContextMenu extends Component {
     );
   }
 }
+
+// <MenuItem data={{foo: 'bar'}} onClick={this.handleClick}>
+//   <Menu selectable={false}>
+//     <Menu.Item key="0" className="none-select">
+//       <Icon type="save" />Paste
+//     </Menu.Item>
+//   </Menu>
+// </MenuItem>
 
 export default FileContextMenu;
