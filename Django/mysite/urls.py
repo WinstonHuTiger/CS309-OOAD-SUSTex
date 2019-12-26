@@ -57,6 +57,7 @@ urlpatterns = [
     path('project/<str:random_str>/download/file/', file_operation.download_file),
     # <disc> delete a file from a project directory
     path('project/<str:random_str>/delete/file/', file_operation.delete_file),
+    # <disc> delete folder/folders from a project directory
     path('project/<str:random_str>/delete/path/', file_operation.delete_path),
     # <disc> compile .tex file, add .pdf to the project directory
     path('project/<str:random_str>/compile/', file_operation.compile_pdf),
@@ -66,13 +67,22 @@ urlpatterns = [
     path('project/<str:random_str>/rename/file/', file_operation.rename_file),
     # REDUNDANT, CHECK
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),
+    # <database> show the differences between two files
     path('project/<str:random_str>/<str:filename>/versions/compare/', views.compare_versions),
+    # <database> get version lists
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
+    # REDUNDANT, CHECK
     path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
+    # <database> rename project in database
     path('project/<str:random_str>/rename/', views.rename_project),
+    # <database> get list of latex templates info
     path('templates/latex/', views.get_latex_templates),
+    # <disc> download .zip file of the whole project directory
     path('project/<str:random_str>/download/', file_operation.download_project),
+    # <disc><database> delete the project from database and from disc
     path('project/<str:random_str>/delete/', views.delete_project),
+    # <database> get list of users
     path('user/search/', views.search_user),
+    # <database> invite users to a project
     path('user/invitation/', views.handel_invitation)
 ]
