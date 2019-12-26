@@ -82,6 +82,8 @@ def delete_file(request, random_str):
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
+    if path == "" and filename == "main.tex":
+        return get_response(ResponseType.SORRY)
     project_path = os.path.join(USER_FILES_DIR, random_str)
     project_path = os.path.join(project_path, path)
     path = os.path.join(project_path, filename)
@@ -130,6 +132,8 @@ def rename_file(request, random_str):
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
+    if path == "" and filename == "main.tex":
+        return get_response(ResponseType.SORRY)
     project_path = os.path.join(USER_FILES_DIR, random_str)
     project_path = os.path.join(project_path, path)
     os.rename(os.path.join(project_path, filename), os.path.join(project_path, new_name))
@@ -238,11 +242,26 @@ def import_project(request):
         project.create_project_path()
         project_path = os.path.join(USER_FILES_DIR, project.random_str)
         zf.extractall(project_path)
+        filenames = os.listdir(project_path)
+        project.save()
+        print(project.random_str)
+        check = False
+        for i in filenames:
+            if os.path.isfile(os.path.join(project_path, i)):
+                if i == "main.tex":
+                    check = True
+                    break
+                elif i.split('.')[-1] == "tex":
+                    os.rename(os.path.join(project_path, i), os.path.join(project_path, "main.tex"))
+                    check = True
+                    break
+        if not check:
+            return get_response(ResponseType.SORRY)
         project.save()
         user_project = UserProject(project=project, user=user, type="Creator")
         user_project.save()
+        Document(project=project, content=open(os.path.join(project_path, "main.tex")).read()).save()
     except Exception as e:
-        print(str(e))
         return get_response(ResponseType.FILE_CORRUPTED)
     return get_response(ResponseType.SUCCESS, "Import project successfully!")
 

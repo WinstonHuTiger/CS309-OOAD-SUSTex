@@ -113,7 +113,7 @@ class Project(models.Model):
         query_doc = Document.objects.filter(project_id=self.id, filename=filename)
         versions = query_doc.count()
         if versions != 0:
-            raise RuntimeError('Document already created!')
+            return
         document = Document(project=self, filename=filename)
         document.project = self
         document.save()
@@ -180,13 +180,11 @@ class UserProject(models.Model):
 
 class Document(models.Model):
     id = models.AutoField(primary_key=True)
-    project = models.ForeignKey('Project', on_delete=models.CASCADE)
-    filename = models.CharField(max_length=50, null=False)
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, unique=True)
     version = models.IntegerField(default=0, db_index=True)
     wb_version = models.IntegerField(default=0, db_index=True)
     last_modify = models.DateTimeField(auto_now=True)
     content = models.TextField(default='')
-    path = models.CharField(max_length=200, null=False, default='')
 
     def __str__(self):
         data = {'id': self.id, 'project': self.project.random_str, 'version': self.version}
@@ -194,9 +192,6 @@ class Document(models.Model):
 
     def get_dict(self):
         return {"project": self.project.random_str, "version": self.version, "last_modify": str(self.last_modify)}
-
-    class Meta:
-        unique_together = ('project', 'filename')
 
 
 class Invitation(models.Model):
