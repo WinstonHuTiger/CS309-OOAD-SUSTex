@@ -4,12 +4,12 @@ from SUSTex.models import User
 from django.contrib import auth
 import requests
 
-IP = "127.0.0.1"
+IP = "10.17.90.172"
 PORT = 8000
 FRONT_PORT = 3000
 LOGIN_SCOPE = 'read:user'
-GITHUB_CLIENT_ID = '7fef2786398de055aad1'
-GITHUB_CLIENT_SECRET = 'fd3779593cff4bb50ca16ea2815a4793ee539fca'
+GITHUB_CLIENT_ID = 'b985317ecf8cfd953f6c'
+GITHUB_CLIENT_SECRET = '5970e79f6e7dd6a553293a713c78f4980b7bc7ae'
 REDIRECT_URI = 'http://%s:%d/login/github/complete' % (IP, PORT)
 GET_USER_INFO_API_URL = 'https://api.github.com/user?access_token='
 LOGIN_API_URL = 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=%s' \
