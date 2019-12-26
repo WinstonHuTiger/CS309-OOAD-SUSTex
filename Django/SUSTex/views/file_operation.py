@@ -3,6 +3,7 @@ from wsgiref.util import FileWrapper
 from SUSTex.models import User, Project, UserProject, Document
 from SUSTex.views.views import get_response, ResponseType
 import zipfile, tempfile, json, os, subprocess, shutil
+import time
 
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
@@ -42,26 +43,28 @@ def file_manage_verify(request, random_str):
 
 def create_file(request, random_str):
     path = request.GET['path']
-    filename = request.GET['filename']
+    filename = request.GET['name']
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
-    lst = filename.split('.')
-    if len(lst) == 1:
-        return HttpResponse('You cannot create a file without a postfix')
-    postfix = lst[-1]
-    if postfix not in ALLOWED_POSTFIX:
-        return HttpResponse('Invalid file type')
+    # lst = filename.split('.')
+    # if len(lst) == 1:
+    #     return get_response(ResponseType.FILE_CORRUPTED, 'You cannot create a file without a postfix')
+    # postfix = lst[-1]
+    # if postfix not in ALLOWED_POSTFIX:
+    #     return HttpResponse('Invalid file type')
     project_path = os.path.join(USER_FILES_DIR, random_str)
     project_path = os.path.join(project_path, path)
     path = os.path.join(project_path, filename)
     file = open(path, 'w+')
     file.close()
-    return HttpResponse(postfix)
+    return get_response(ResponseType.SUCCESS, "Create File Successfully!")
 
 
 def create_path(request, random_str):
-    path = request.GET['path'].split('/')
+    path = request.GET['path']
+    name = request.GET['name']
+    path = os.path.join(path, name).split('/')
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
@@ -70,12 +73,12 @@ def create_path(request, random_str):
         project_path = os.path.join(project_path, i)
         if not os.path.isdir(project_path):
             os.makedirs(project_path)
-    return HttpResponse("create path successfully")
+    return get_response(ResponseType.SUCCESS, "create path successfully")
 
 
 def delete_file(request, random_str):
     path = request.GET['path']
-    filename = request.GET['filename']
+    filename = request.GET['name']
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
@@ -84,8 +87,8 @@ def delete_file(request, random_str):
     path = os.path.join(project_path, filename)
     if os.path.exists(path):
         os.remove(path)
-        return HttpResponse('Delete successfully')
-    return HttpResponse('This file or path does not exist')
+        return get_response(ResponseType.SUCCESS, 'Delete successfully')
+    return get_response(ResponseType.SUCCESS, 'This file or path does not exist')
 
 
 def delete_path(request, random_str):
@@ -123,8 +126,8 @@ def upload_file(request, random_str):
 
 
 def rename_file(request, random_str):
-    filename = request.GET['filename']
     path = request.GET['path']
+    filename = request.GET['name']
     new_name = request.GET['new_name']
     verify = file_manage_verify(request, random_str)
     if verify is not None:
@@ -132,7 +135,7 @@ def rename_file(request, random_str):
     project_path = os.path.join(USER_FILES_DIR, random_str)
     project_path = os.path.join(project_path, path)
     os.rename(os.path.join(project_path, filename), os.path.join(project_path, new_name))
-    return HttpResponse('Rename file successfully')
+    return get_response(ResponseType.SUCCESS, 'Rename file successfully')
 
 
 def rename_path(request, random_str):
@@ -270,3 +273,56 @@ def create_from_template(request):
     user_project = UserProject(project=project, user=user, type="Creator")
     user_project.save()
     return get_response(ResponseType.SUCCESS, "SUCCESS")
+
+
+def trans_time(timestamp):
+    time_struct = time.localtime(timestamp)
+    return time.strftime('%Y-%m-%d %H:%M:%S', time_struct)
+
+
+# https://blog.csdn.net/qiqiyingse/article/details/83993098
+def get_path_attribute(request, random_str):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    path = request.GET["path"]
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    path = os.path.join(project_path, path)
+    if not os.path.isdir(path):
+        return get_response(ResponseType.DOCUMENT_NOT_FOUND)
+    size = 0
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            size += os.path.getsize(os.path.join(root, f))
+    ret = {
+        "size": int(size / 1024),
+        "access_time": trans_time(os.path.getatime(path)),
+        "create_time": trans_time(os.path.getctime(path)),
+        "modify_time": trans_time(os.path.getmtime(path))
+    }
+    return get_response(ResponseType.SUCCESS, ret)
+
+
+def get_file_attribute(request, random_str):
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    path = request.GET["path"]
+    name = request.GET["name"]
+    if path == "":
+        path = name
+    else:
+        path = os.path.join(path, name)
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    path = os.path.join(project_path, path)
+    if not os.path.isdir(path):
+        return get_response(ResponseType.DOCUMENT_NOT_FOUND)
+    size = 0
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            size += os.path.getsize(os.path.join(root, f))
+    ret = {
+        "size": int(size / 1024),
+        "access_time": trans_time(os.path.getatime(path)),
+        "create_time": trans_time(os.path.getctime(path)),
+        "modify_time": trans_time(os.path.getmtime(path))
+    }
+    return get_response(ResponseType.SUCCESS, ret)
