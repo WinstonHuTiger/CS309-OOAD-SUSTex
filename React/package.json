@@ -25,6 +25,7 @@
     "react-dom": "^16.9.0",
     "react-keyed-file-browser": "^1.6.0",
     "react-lightbox-component": "^1.2.1",
+    "react-load-script": "^0.0.6",
     "react-markdown": "^4.2.2",
     "react-mathjax": "^1.0.1",
     "react-reveal": "^1.2.2",

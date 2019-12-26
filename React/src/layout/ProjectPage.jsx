@@ -495,6 +495,11 @@ class File extends Component {
     }
   }
 
+  onClick = (e) => {
+    e.stopPropagation();
+    this.props.updatePath(this.props.item["filename"], this.props.path);
+  }
+
   render() {
     const item = this.props.item;
     const path = this.props.path;
@@ -504,7 +509,7 @@ class File extends Component {
       <>
         <ContextMenuTrigger id={path + item["filename"] +"-file"}
         attributes={{'path': path, 'name': name, 'project': project}}>
-        <div className={this.state.selected?"item-selected":(null)}>
+        <div className={this.state.selected?"item-selected":(null)} onClick={this.onClick}>
           <span className="none-select">
             <Icon type={this.getFileType(item["type"])} />{this.state.rename?(
               <Input
@@ -600,6 +605,7 @@ class FileManagement extends Component {
               updateProjectInfo={this.props.updateProjectInfo}
               project={this.props.project}
               uploadFile={this.uploadFile}
+              updatePath={this.props.updatePath}
               />
             </Menu.Item>
         )}
@@ -734,16 +740,64 @@ class FileManagement extends Component {
   }
 }
 
-
+class Editor extends Component {
+  render() {
+    let path = this.props.path;
+    let name = this.props.name;
+    if (path == null || name == null)
+      return null;
+    var content = null;
+    let arr = name.split('.');
+    let postfix = arr[arr.length - 1];
+    if (path == "" && name == "main.tex") {
+      content = (
+        <div style={{width:"100%"}}>
+          <LatexEditor socket={this.props.socket}
+            project={this.props.project}/>
+        </div>
+      )
+    } else if (postfix == "md") {
+      content = <MarkdownEditor path={this.props.path} name={this.props.name}/>
+    } else if (postfix == "txt") {
+      content = <></>
+    } else {
+      return (
+        <div className="not-support none-select">
+          Sorry, browser cannot read this file.
+        </div>
+      )
+    }
+    return(
+      <>
+        {content}
+      </>
+    );
+  }
+}
 
 class ProjectPage extends Component {
   constructor(props) {
     super(props);
+    let random_str = props.match["params"]["random_str"];
+    let endpoint = window.ws + '/project/' + random_str + '/'
+    let socket = new WebSocket(endpoint);
+    socket.onopen = (e) => {
+      console.log("open", e);
+    };
+    socket.onerror = (e) => {
+      console.log("error", e);
+    };
+    socket.onclose = (e) => {
+      console.log("close", e);
+    };
+    this.socket = socket;
     this.state = {
       userInfo: null,
       projectInfo: null,
       files: null,
-      project: null
+      project: null,
+      name: null,
+      path: null,
     };
   }
 
@@ -783,6 +837,15 @@ class ProjectPage extends Component {
     });
   }
 
+  makeId = () => {
+      var out = '';
+      var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      for (var i = 0; i < 16; ++i) {
+          out += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return out;
+  }
+
   updateProjectInfo = () => {
     const _this = this;
     axios.get(window.url + "/project/" + this.props.match.params["random_str"] + "/")
@@ -805,6 +868,13 @@ class ProjectPage extends Component {
     });
   }
 
+  updatePath = (name, path) => {
+    this.setState({
+      name: name,
+      path: path
+    });
+  }
+
   render() {
     return (
       <Layout>
@@ -817,7 +887,12 @@ class ProjectPage extends Component {
               updateProjectInfo={this.updateProjectInfo}
               projectInfo={this.state.projectInfo}
               project={this.state.project}
-              files={this.state.files}/>
+              files={this.state.files}
+              updatePath={this.updatePath}/>
+            <Editor path={this.state.path}
+            project={this.state.project}
+            name={this.state.name}
+            socket={this.socket}/>
           </Layout>
       </Layout>
     );

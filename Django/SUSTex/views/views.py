@@ -3,9 +3,11 @@ from django.contrib import auth
 from django.http import HttpResponse, FileResponse
 from SUSTex.models import User, Project, Document, UserProject, DocumentChange, Invitation, AuthorityChange
 from Utils.diff_match_patch import diff_match_patch
+from django.views.decorators.clickjacking import xframe_options_exempt
 import json
 import os
 from enum import Enum, unique
+from django.shortcuts import render
 # from file_operation import ALLOWED_POSTFIX
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
@@ -330,14 +332,14 @@ def get_doc_info(request, random_str):
     :param random_str: indicator of a project
     :return: basic info of a file (filename, last_modify, content, version)
     '''
-    filename = request.GET['filename']
+    filename = "main.tex"
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
-    response = Document.objects.filter(filename=filename, project=project).order_by('-version')
+    response = Document.objects.filter(filename="main.tex", project=project).order_by('-version')
     if response.count() == 0:
         return get_response(ResponseType.DOCUMENT_NOT_FOUND)
     document = response[0]
@@ -348,7 +350,7 @@ def get_doc_info(request, random_str):
         "version": document.version,
         "wb_version": document.wb_version,
     }
-    return get_response(ResponseType.SUCCESS, json.dumps(re))
+    return get_response(ResponseType.SUCCESS, re)
 
 
 def get_latex_templates(request):
@@ -570,3 +572,14 @@ def change_authority(request):
             user_project.authority = authority
             user_project.save()
     return get_response(ResponseType.SUCCESS, "Change authority successfully!")
+
+
+def save_doc(request, random_str):
+    doc = request.GET["doc"]
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    project = Project.objects.get(random_str=random_str)
+    document = Document.objects.get(project=project)
+    document.content = doc
+    document.save()
+    return get_response(ResponseType.SUCCESS, "Save File!")

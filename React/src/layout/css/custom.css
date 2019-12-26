@@ -490,3 +490,28 @@ html, body {
   height: 22px !important;
   width: 80%;
 }
+
+.not-support {
+  margin-top: 64px;
+  height: calc(100vh - 64px);
+  font-size: 20px;
+  padding-top: calc(50vh - 32px);
+  z-index: 10;
+  width: 100%;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.editor {
+  margin-top: 64px;
+  overflow: hidden;
+  height: calc(100vh - 64px);
+  width: 50%;
+}
+
+.iframe-container-editor {
+  margin-top: 64px;
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 64px);
+}

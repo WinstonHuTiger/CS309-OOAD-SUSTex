@@ -10452,6 +10452,11 @@ react-lightbox-component@^1.2.1:
     prop-types "^15.6.2"
     react-transition-group "1.x"
 
+react-load-script@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.npm.taobao.org/react-load-script/download/react-load-script-0.0.6.tgz#db6851236aaa25bb622677a2eb51dad4f8d2c258"
+  integrity sha1-22hRI2qqJbtiJnei61Ha1PjSwlg=
+
 react-markdown@^4.2.2:
   version "4.2.2"
   resolved "https://registry.npm.taobao.org/react-markdown/download/react-markdown-4.2.2.tgz#b378774fcffb354653db8749153fc8740f9ed2f1"

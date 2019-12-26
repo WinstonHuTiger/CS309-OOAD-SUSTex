@@ -1,6 +1,6 @@
 /* eslint  no-unused-vars: "off" */
 import CodeMirror from 'codemirror/lib/codemirror.js';
-import React, { Component } from 'react';
+import React, { Component, message } from 'react';
 import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
 import '../tools/show-hint.js';
 import 'codemirror/addon/fold/foldcode.js';
@@ -10,6 +10,7 @@ import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
 import CodeMirrorSpellChecker from 'codemirror-spell-checker';
 import { Select } from 'antd';
+import axios from 'axios';
 
 const { Option } = Select;
 var codeMirror;
@@ -162,8 +163,7 @@ class LatexEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      text: this.props.text,
-      id: this.props.id,
+      text: "",
       autoComplete: false,
       cursorLeft: 0,
       cursorTop: 0,
@@ -171,6 +171,7 @@ class LatexEditor extends Component {
   }
 
   componentDidMount = () => {
+    const _this = this;
     var latex_mode = CodeMirrorGrammar.getMode(global.constants.latex_grammar, null, CodeMirror);
     CodeMirrorSpellChecker({
     	codeMirrorInstance: CodeMirror,
@@ -201,6 +202,9 @@ class LatexEditor extends Component {
     CodeMirror.commands['my_autocompletion'] = function( cm ) {
         CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:true, caseInsensitiveMatch:true});
     };
+    CodeMirror.commands['save'] = function( cm ) {
+        
+    };
     // this also works (takes priority if set)
     latex_mode.autocompleter.options = {prefixMatch:true, caseInsensitiveMatch:false};
     // or for context-sensitive autocompletion, extracted from the grammar
@@ -215,12 +219,13 @@ class LatexEditor extends Component {
         lineWrapping: true,
         lint: true,  // enable lint validation
         matching: true,  // enable token matching, e.g braces, tags etc..
-        extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment"},
+        extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment", "Ctrl+S": "save"},
         foldGutter: true,
         theme: "base16-tomorrow-light",
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
         value: this.state.text
     });
+    this.cm = codeMirror;
    codeMirror.on('change',() => {
      let start = codeMirror.getTokenAt(codeMirror.getCursor())["start"];
      let position = codeMirror.cursorCoords({ line: codeMirror.getCursor()["line"], ch: start });
@@ -232,7 +237,6 @@ class LatexEditor extends Component {
      this.setState({
        text: codeMirror.getValue()
      });
-     this.props.updateFater(this.state.text);
    });
    codeMirror.on("keyup", (cm, event) => {
      let pos = cm.getCursor();
@@ -262,14 +266,27 @@ class LatexEditor extends Component {
       }
      }
    });
+   axios.get(window.url + '/project/' + this.props.project + '/document')
+   .then((msg) => {
+     if (msg.data["code"] == 1) {
+       _this.setState({
+         text: msg.data["message"]["content"],
+       });
+       _this.cm.setValue(msg.data["message"]["content"]);
+     } else {
+       message.error("Error code:" + msg.data["code"] + ", " + msg.data["message"]);
+     }
+   })
+   .catch((error) => {
+
+   });
   };
   ref = React.createRef();
   render = () => (
     <>
       <div
+        className="editor"
         ref={self => this.editor = self}
-        id={this.state.id}
-        style={this.props.blur?blur:null}
          />
     </>
   );

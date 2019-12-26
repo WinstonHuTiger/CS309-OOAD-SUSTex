@@ -289,6 +289,7 @@ def create_from_template(request):
     project.save()
     user_project = UserProject(project=project, user=user, type="Creator")
     user_project.save()
+    Document(project=project, content=open(os.path.join(project_path, "main.tex")).read()).save()
     return get_response(ResponseType.SUCCESS, "SUCCESS")
 
 

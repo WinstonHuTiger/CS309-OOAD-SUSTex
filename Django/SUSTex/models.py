@@ -180,6 +180,7 @@ class UserProject(models.Model):
 
 class Document(models.Model):
     id = models.AutoField(primary_key=True)
+    filename = models.CharField(max_length=50, default="main.tex")
     project = models.ForeignKey('Project', on_delete=models.CASCADE, unique=True)
     version = models.IntegerField(default=0, db_index=True)
     wb_version = models.IntegerField(default=0, db_index=True)

@@ -64,6 +64,7 @@ CHANNEL_LAYERS = {
 }
 
 ROOT_URLCONF = 'mysite.urls'
+X_FRAME_OPTIONS = 'ALLOWALL url'
 
 TEMPLATES = [
     {

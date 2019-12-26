@@ -85,5 +85,6 @@ urlpatterns = [
     # <database> invite users to a project
     path('user/invitation/', views.handel_invitation),
     path('project/<str:random_str>/attribute/path/', file_operation.get_path_attribute),
-    path('project/<str:random_str>/attribute/file/', file_operation.get_file_attribute)
+    path('project/<str:random_str>/attribute/file/', file_operation.get_file_attribute),
+    path('project/<str:random_str>/document/save/', views.save_doc),
 ]
