@@ -19,29 +19,53 @@ from SUSTex.views import file_operation, views
 
 
 urlpatterns = [
+    # redirect to github auth login interface
     path('login/github/', github_login.login),
+    # <database> retrieve user info from github
     path('login/github/complete', github_login.complete),
+    # logout from github
     path('logout/', views.logout),
+    # <database> get user info from database
     path('user/', views.get_user_info),
+    # <database> get user project list from database
     path('user/projects/', views.get_user_projects),
+    # <database> create project, add record to database
     path('project/create/', views.create_project),
+    # <database> create project from given template, add record to database
     path('project/create/template/', file_operation.create_from_template),
+    # <database> create project from uploaded .zip file, add record to database
     path('project/import/', file_operation.import_project),
+    # <database> add list of collaborators to a project in the database
     path('project/invite/', views.add_collaborator),
+    # <database> change authority of list of users to a project in the database
     path('project/authority/', views.change_authority),
+    # <database> get project info from database
     path('project/<str:random_str>/', views.get_project_info),
+    # <database> add version record to a project in the database
     path('project/<str:random_str>/create/version/<str:filename>/', views.create_version),
+    # <database> add file record of a project in the database
     path('project/<str:random_str>/create/document/', views.create_doc),
+    # <database> get file info (filename, last_modify, content, version) from database
     path('project/<str:random_str>/document/', views.get_doc_info),
+    # <disc> create file to a project directory
     path('project/<str:random_str>/create/file/', file_operation.create_file),
+    # <disc> create a folder in the file system
     path('project/<str:random_str>/create/path/', file_operation.create_path),
+    # <disc> upload a file to a project directory
     path('project/<str:random_str>/upload/', file_operation.upload_file),
+    # <disc> download a file to a project directory
     path('project/<str:random_str>/download/file/', file_operation.download_file),
+    # <disc> delete a file from a project directory
     path('project/<str:random_str>/delete/file/', file_operation.delete_file),
     path('project/<str:random_str>/delete/path/', file_operation.delete_path),
+    # <disc> compile .tex file, add .pdf to the project directory
     path('project/<str:random_str>/compile/', file_operation.compile_pdf),
+    # <disc> move file
     path('project/<str:random_str>/rename/path/', file_operation.rename_path),
+    # <disc> rename file
     path('project/<str:random_str>/rename/file/', file_operation.rename_file),
+    # REDUNDANT, CHECK
+    path('project/<str:random_str>/rename/path/', file_operation.rename_path),
     path('project/<str:random_str>/<str:filename>/versions/compare/', views.compare_versions),
     path('project/<str:random_str>/<str:filename>/versions/', views.get_versions),
     path('project/<str:random_str>/<str:filename>/versions/create/', views.create_version),
