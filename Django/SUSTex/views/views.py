@@ -306,6 +306,9 @@ def rename_project(request, random_str):
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    response = UserProject.objects.filter(project=project, user=User.objects.get(id=request.user.id))
+    if response.count() == 0 or response[0].type == "Member":
+        return get_response(ResponseType.INVALID_AUTHORITY)
     project.name = request.GET['name']
     project.save()
     return get_response(ResponseType.SUCCESS, "Rename successfully!")
@@ -399,7 +402,7 @@ def delete_project(request, random_str):
     if response.count() == 0:
         return get_response(ResponseType.NOT_IN_PROJECT)
     user_project = response[0]
-    if user_project.authority != 'rw':
+    if user_project.authority != 'rw' or user_project.type == "Member":
         return get_response(ResponseType.NO_AUTHORITY)
     project_path = os.path.join(BASE_DIR, "UserData/Projects")
     project_path = os.path.join(project_path, random_str)
@@ -463,6 +466,9 @@ def add_collaborator(request):
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    response = UserProject.objects.filter(project=project, user=admin)
+    if response.count() == 0 or response[0].type == "Member":
+        return get_response(ResponseType.INVALID_AUTHORITY)
     not_found = []
     success = []
     already_in = []
@@ -533,6 +539,10 @@ def change_authority(request):
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    user = User.objects.get(id=request.user.id)
+    response = UserProject.objects.filter(project=project, user=user)
+    if response.count() == 0 or response[0].type == "Member":
+        return get_response(ResponseType.INVALID_AUTHORITY)
     for i in users:
         random_id = i["id"]
         authority = i["authority"]
