@@ -108,12 +108,10 @@ def delete_path(request, random_str):
 
 def upload_file(request, random_str):
     file = request.FILES.get('file')
-    path = request.POST['path']
     verify = file_manage_verify(request, random_str)
     if verify:
         return verify
     filepath = os.path.join(USER_FILES_DIR, random_str)
-    filepath = os.path.join(filepath, path)
     filename = str(file)
     if os.path.isdir(filepath):
         filepath = os.path.join(filepath, filename)

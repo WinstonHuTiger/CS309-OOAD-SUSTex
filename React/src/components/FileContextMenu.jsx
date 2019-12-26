@@ -207,9 +207,21 @@ class FileContextMenu extends Component {
     });
   }
 
+  onClickUpload = (e) => {
+    e.stopPropagation();
+    this.props.uploadFile();
+  }
+
   render() {
     return(
       <>
+        <MenuItem data={{foo: 'bar'}} onClick={this.onClickUpload}>
+          <Menu selectable={false}>
+            <Menu.Item key="0" className="none-select">
+              <Icon type="upload" />Upload
+            </Menu.Item>
+          </Menu>
+        </MenuItem>
         <MenuItem data={{foo: 'bar'}} onClick={this.newFileClick}>
           <Menu selectable={false}>
             <Menu.Item key="0" className="none-select">
@@ -266,30 +278,38 @@ class FileContextMenu extends Component {
             </Menu.Item>
           </Menu>
         </MenuItem>
-        <Modal
-          title="New File"
-          visible={this.state.newFile}
-          onOk={this.newFileOk}
-          onCancel={this.newFileCancel}
-        >
-          <Input placeholder="filename"
-            value={this.state.nameValue}
-            onChange={this.inputName}
-            onPressEnter={this.newFileOk}
-            autoFocus/>
-        </Modal>
-        <Modal
-          title="New Folder"
-          visible={this.state.newFolder}
-          onOk={this.newFolderOk}
-          onCancel={this.newFolderCancel}
-        >
-          <Input placeholder="filename"
-            value={this.state.folderNameValue}
-            onChange={this.inputFolderName}
-            onPressEnter={this.newFolderOk}
-            autoFocus/>
-        </Modal>
+        {
+          this.state.newFile?(
+            <Modal
+              title="New File"
+              visible={this.state.newFile}
+              onOk={this.newFileOk}
+              onCancel={this.newFileCancel}
+            >
+              <Input placeholder="filename"
+                value={this.state.nameValue}
+                onChange={this.inputName}
+                onPressEnter={this.newFileOk}
+                autoFocus/>
+            </Modal>
+          ):(null)
+        }
+        {
+          this.state.newFolder?(
+            <Modal
+              title="New Folder"
+              visible={this.state.newFolder}
+              onOk={this.newFolderOk}
+              onCancel={this.newFolderCancel}
+            >
+              <Input placeholder="filename"
+                value={this.state.folderNameValue}
+                onChange={this.inputFolderName}
+                onPressEnter={this.newFolderOk}
+                autoFocus/>
+            </Modal>
+          ):(null)
+        }
       </>
     );
   }

@@ -4,7 +4,7 @@ import { Row, Col } from 'antd';
 import axios from 'axios';
 import NProgress from '../tools/nprogress';
 import Header from './Header';
-import { Menu, Button, Popover, Icon, Input, Modal } from 'antd';
+import { Menu, Button, Popover, Icon, Input, Modal, Upload } from 'antd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import FileContextMenu from '../components/FileContextMenu';
 import FolderContextMenu from '../components/FolderContextMenu';
@@ -19,7 +19,7 @@ import { Resizable } from "re-resizable";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 const { Search } = Input;
-const { Dragger } = Modal;
+const { Dragger } = Upload;
 var startTime;
 
 const triggerStyle = {
@@ -352,7 +352,8 @@ class Folder extends Component {
     super(props);
     this.state = {
       updateProjectInfo: props.updateProjectInfo,
-      rename: false
+      rename: false,
+      uploadFile: props.uploadFile
     }
   }
 
@@ -416,7 +417,8 @@ class Folder extends Component {
         </ContextMenuTrigger>
         <ContextMenu id={item["path"] + "-folder"} className="contextMenu">
           <FolderContextMenu updateProjectInfo={this.props.updateProjectInfo}
-          updateRename={this.updateRename}/>
+          updateRename={this.updateRename}
+          uploadFile={this.state.uploadFile}/>
         </ContextMenu>
       </>
     );
@@ -429,7 +431,8 @@ class File extends Component {
     this.state = {
       updateProjectInfo: props.updateProjectInfo,
       rename: false,
-      selected: false
+      selected: false,
+      uploadFile: props.uploadFile
     }
   }
 
@@ -517,7 +520,8 @@ class File extends Component {
         </ContextMenuTrigger>
         <ContextMenu id={path + item["filename"] + "-file"} className="contextMenu">
           <FileContextMenu updateProjectInfo={this.props.updateProjectInfo}
-          updateRename={this.updateRename}/>
+          updateRename={this.updateRename}
+          uploadFile={this.state.uploadFile}/>
         </ContextMenu>
       </>
     );
@@ -533,6 +537,7 @@ class FileManagement extends Component {
       modalIsOpen: true,
       leftShow: false,
       fileList: [],
+      fileUpload: false
     }
   }
 
@@ -560,6 +565,12 @@ class FileManagement extends Component {
     });
   };
 
+  uploadFile = () => {
+    this.setState({
+      fileUpload: true
+    });
+  }
+
   renderDir = (files) => {
     if (files == null) {
       return null;
@@ -575,7 +586,8 @@ class FileManagement extends Component {
           title={
             <Folder item={item}
             updateProjectInfo={this.props.updateProjectInfo}
-            project={this.props.project}/>
+            project={this.props.project}
+            uploadFile={this.uploadFile}/>
           }
         >
         {this.renderDir(item)}
@@ -587,6 +599,7 @@ class FileManagement extends Component {
               path={files["path"]}
               updateProjectInfo={this.props.updateProjectInfo}
               project={this.props.project}
+              uploadFile={this.uploadFile}
               />
             </Menu.Item>
         )}
@@ -600,31 +613,21 @@ class FileManagement extends Component {
     if (status == "removed"){
       re = [];
     } else if (status === 'done') {
-      let arr = info.file.name.split('.')
-      let prefix = arr[arr.length - 1];
-      if (prefix != "zip") {
-        message.error("Invalid file type, please upload Zip file.");
-        re = [];
+      if (info.file.response["code"] == 1) {
+        message.success(`${info.file.name} file uploaded successfully.`);
+        this.updateProjectInfo();
+        this.zipOk();
+      } else if (info.file.response["code"] == 2) {
+        message.error("Error code " + info.file.response["code"] + ": " + info.file.response["message"]);
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
       } else {
-        if (info.file.response["code"] == 1) {
-          message.success(`${info.file.name} file uploaded successfully.`);
-          this.updateProjectInfo();
-          this.zipOk();
-        } else if (info.file.response["code"] == 2) {
-          message.error("Error code " + info.file.response["code"] + ": " + info.file.response["message"]);
-          setTimeout(() => {
-            window.location.reload();
-          }, 300);
-        } else {
-          message.error("File corrupted! Please check it.")
-        }
+        message.error("File corrupted! Please check it.")
       }
     } else if (status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
-    this.setState({
-      fileList: re
-    });
   }
 
   uploadProps = {
@@ -670,6 +673,13 @@ class FileManagement extends Component {
     },
   };
 
+  fileUploadOk = () => {
+    this.setState({
+      fileUpload: false
+    });
+    this.props.updateProjectInfo();
+  }
+
   render(){
     const files = this.renderDir(this.props.files);
       return(
@@ -701,21 +711,20 @@ class FileManagement extends Component {
         </div>
         <Modal
           title="Upload File"
-          visible={this.state.zipProject}
-          onOk={this.zipOk}
-          onCancel={this.zipOk}
+          visible={this.state.fileUpload}
+          onOk={this.fileUploadOk}
+          onCancel={this.fileUploadOk}
         >
           <Dragger
-          fileList={this.state.fileList}
-          onChange={this.onFileChange}
-          action={window.url + "/project/import/"}
+          multiple={true}
+          action={window.url + "/project/" + this.props.project + "/upload/"}
           {...this.uploadProps}>
             <p className="ant-upload-drag-icon">
               <Icon type="inbox" />
             </p>
             <p className="ant-upload-text">Click or drag file to this area to upload</p>
             <p className="ant-upload-hint">
-              Only support one zip file.
+              Only support files.
             </p>
           </Dragger>
         </Modal>

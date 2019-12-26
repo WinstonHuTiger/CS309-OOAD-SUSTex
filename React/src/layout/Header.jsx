@@ -123,11 +123,6 @@ class Header extends Component {
               <Menu.Item key="templates">
                 <Link to="/templates">Templates</Link>
               </Menu.Item>
-              {this.state.page == 'project' ? (
-                <Menu.Item key="share">
-                  <Link to="/share">Share</Link>
-                </Menu.Item>
-              ) : (null)}
             </Menu>
             <UserAvatar userInfo={this.props.userInfo} history={this.props.history}/>
             <Col span={1} />
