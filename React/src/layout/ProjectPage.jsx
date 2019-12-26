@@ -397,7 +397,7 @@ class Folder extends Component {
     const item = this.props.item;
     return(
       <>
-        <ContextMenuTrigger id={item["path"] + "-folder"}
+        <ContextMenuTrigger id={item["path"] + "-folder"} onClick={this.click}
         attributes={{'path': item["path"], 'project': this.props.project}}>
           <div>
             <span className="none-select">
@@ -427,7 +427,8 @@ class File extends Component {
     super(props);
     this.state = {
       updateProjectInfo: props.updateProjectInfo,
-      rename: false
+      rename: false,
+      selected: false
     }
   }
 
@@ -499,7 +500,7 @@ class File extends Component {
       <>
         <ContextMenuTrigger id={path + item["filename"] +"-file"}
         attributes={{'path': path, 'name': name, 'project': project}}>
-        <div>
+        <div className={this.state.selected?"item-selected":(null)}>
           <span className="none-select">
             <Icon type={this.getFileType(item["type"])} />{this.state.rename?(
               <Input
@@ -686,8 +687,6 @@ class ProjectPage extends Component {
           files: msg.data["message"]["files"],
           project: msg.data["message"]["random_str"]
         });
-        console.log("PROJECT")
-        console.log(msg.data["message"])
       } else if (msg.data["code"] == 2) {
 
       } else {
@@ -702,7 +701,10 @@ class ProjectPage extends Component {
   render() {
     return (
       <Layout>
-          <Header page="project" userInfo={this.state.userInfo}/>
+          <Header page="project"
+          userInfo={this.state.userInfo}
+          history={this.props.history}
+          />
           <Layout>
             <FileManagement
               updateProjectInfo={this.updateProjectInfo}

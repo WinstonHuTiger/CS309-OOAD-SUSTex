@@ -246,10 +246,11 @@ class ProjectCard extends Component {
     targetKeys: [],
     key: 0,
     manageVisible: false,
-    changes: new Array(this.props.projectInfo.length),
     radioKey: 0,
     hover: false
   }
+
+  changes = new Array(this.props.projectInfo.length);
 
   onMouseEnter = () => {
     this.setState({
@@ -410,16 +411,17 @@ class ProjectCard extends Component {
 
   manageOk = () => {
     this.setState({
-      manageVisible: false
+      manageVisible: false,
+      radioKey: this.state.radioKey + 1
     });
     let re = [];
     let i;
-    for (i = 0; i < this.state.changes.length; i++) {
-      if (this.state.changes[i] != undefined) {
+    for (i = 0; i < this.changes.length; i++) {
+      if (this.changes[i] != undefined) {
         let item = this.props.projectInfo["users"][i];
         re.push({
           "id": item["id"],
-          "authority": this.state.changes[i],
+          "authority": this.changes[i],
         });
       }
     }
@@ -454,17 +456,13 @@ class ProjectCard extends Component {
   manageCancel = () => {
     this.setState({
       manageVisible: false,
-      radioKey: this.state.radioKey + 1,
-      changes: new Array(this.props.projectInfo["users"].length)
+      radioKey: this.state.radioKey + 1
     });
+    this.changes = new Array(this.props.projectInfo["users"].length);
   }
 
   setChange = (index, val) => {
-    let arr = this.state.changes;
-    arr[index] = val;
-    this.setState({
-      changes: arr
-    });
+    this.changes[index - 1] = val;
   }
 
   mouseEnter = () => {
@@ -487,14 +485,14 @@ class ProjectCard extends Component {
       </span>
     );
     const userItems = this.props.projectInfo["users"].map((item, index) => {
-      console.log(item)
-      if (item["id"] == this.props.userInfo["random_id"] || item["type"] == "Creator") {
+      if (this.props.userInfo == null || this.props.userInfo == undefined ||
+        item["random"] || item["id"] == this.props.userInfo["random_id"] || item["type"] == "Creator") {
         return null;
       }
       return <UserRadio
       userInfo={item}
       key={_this.state.radioKey}
-      setChange={this.setChange}
+      setChange={_this.setChange}
       index={index}/>
     });
     return(
@@ -571,15 +569,19 @@ class ProjectCard extends Component {
          updateInfo={this.updateInfo}
          project={this.props.projectInfo["project"]}/>
        </Modal>
-       <Modal
-          title="Manage Project"
-          visible={this.state.manageVisible}
-          onOk={this.manageOk}
-          onCancel={this.manageCancel}
-          width={500}
-        >
-          {userItems}
-        </Modal>
+       {
+         this.state.manageVisible?(
+           <Modal
+              title="Manage Project"
+              visible={this.state.manageVisible}
+              onOk={this.manageOk}
+              onCancel={this.manageCancel}
+              width={500}
+            >
+              {userItems}
+            </Modal>
+         ):(null)
+       }
       </Col>
     );
   }
@@ -598,20 +600,17 @@ class InvitationNotification extends Component {
       if (msg.data["code"] == 1) {
         if (val == "accept") {
           message.success("Accept invitation!");
-          setTimeout(() => {
-            window.location.reload();
-          }, 300);
         } else {
           message.success("Refuse invitation!");
         }
+        notification.close(_this.props.keyNum);
+        _this.props.updateProjectInfo();
       } else if (msg.data["code"] == 2) {
         message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
-        setTimeout(() => {
-          window.location.reload();
-        }, 300);
       } else {
         message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
       }
+      _this.props.updateProjectInfo();
     })
     .catch((error) => {
       console.log(error);
@@ -703,11 +702,15 @@ class WorkBenchPage extends Component {
         let j;
         for (j = 0; j < msg.data["message"]["invitations"].length; j++) {
           let item = msg.data["message"]["invitations"][j];
+          let num = `open${Date.now()}`;
           const args = {
+            key: num,
             message: 'New Invitation',
             description:
               (
-                 <InvitationNotification invitation={item} updateProjectInfo={this.updateProjectInfo}/>
+                 <InvitationNotification invitation={item}
+                 updateProjectInfo={this.updateProjectInfo}
+                 keyNum={num} />
               ),
             duration: 0,
           };
@@ -884,7 +887,7 @@ class WorkBenchPage extends Component {
                 <Icon type="file" /> Empty Project
               </Menu.Item>
               <Menu.Item>
-                <Link to="/templates/"><Icon type="book" /> Import from Templte</Link>
+                <Link to="/templates/"><Icon type="book" /> Import from Template</Link>
               </Menu.Item>
               <Menu.Item onClick={this.zipProject}>
                 <Icon type="file-zip" /> Load from Zip File
