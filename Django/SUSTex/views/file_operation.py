@@ -139,7 +139,7 @@ def rename_file(request, random_str):
 
 
 def rename_path(request, random_str):
-    path = request.GET['path'].split("/")
+    path = os.path.split(request.GET['path'])
     new_name = request.GET['name']
     verify = file_manage_verify(request, random_str)
     if verify is not None:
