@@ -101,17 +101,7 @@ body {
   position: fixed;
   width: 180px;
   box-shadow: 0px 2px 10px #999999;
-  border: 1px solid #bdbdbd;
-  z-index: 10;
-}
-
-.contextMenu {
-  background: #FFF;
-  padding: 2px 0;
-  position: fixed;
-  width: 180px;
-  box-shadow: 0px 2px 10px #999999;
-  z-index: 10;
+  z-index: 9999;
 }
 
 .contextMenu .ant-menu-item {
@@ -461,10 +451,10 @@ html, body {
 }
 
 .file-item, .folder .ant-menu-submenu-title {
-  height: 24px !important;
+  height: 28px !important;
   padding-top: 2px !important;
   padding-bottom: 2px !important;
-  margin: 2px 0 !important;
+  margin: 0 !important;
 }
 
 .file-item div {

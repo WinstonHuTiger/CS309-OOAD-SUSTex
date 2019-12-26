@@ -4,7 +4,7 @@ from SUSTex.models import User
 from django.contrib import auth
 import requests
 
-IP = "10.17.61.29"
+IP = "127.0.0.1"
 PORT = 8000
 FRONT_PORT = 3000
 LOGIN_SCOPE = 'read:user'

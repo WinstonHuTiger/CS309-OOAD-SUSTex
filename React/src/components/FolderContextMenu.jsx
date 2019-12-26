@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Layout, Menu, Button, Popover, Icon, Input, message } from 'antd';
+import { Layout, Menu, Button, Popover, Icon, Input, message, Modal } from 'antd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import axios from 'axios';
+
+const { confirm } = Modal;
 
 class FileContextMenu extends Component {
   constructor(props) {
@@ -14,33 +16,77 @@ class FileContextMenu extends Component {
   }
 
   deleteFolder = (e, data, target) => {
-    console.log("HERE");
     e.stopPropagation();
     let path = target.getAttribute('path');
     let project = target.getAttribute('project');
     const _this = this;
-    axios.get(window.url + '/project/' + project + '/delete/path/', {
+    confirm({
+    title: 'Are you sure delete this folder?',
+    content: 'This operation is irreversible',
+    okText: 'Yes',
+    okType: 'danger',
+    cancelText: 'No',
+    onOk() {
+      axios.get(window.url + '/project/' + project + '/delete/path/', {
+        params: {
+          path: path
+        }
+      })
+      .then((msg) => {
+        if (msg.data["code"] == 1) {
+          message.success("Delete folder: (" + path + ") successfully");
+        } else {
+          message.error("Error code :" + msg.data["code"] + ", " + msg.data["message"]);
+        }
+        _this.props.updateProjectInfo();
+      })
+      .catch((error) => {
+        message.error("Server error!");
+      });
+      _this.props.updateProjectInfo();
+    },
+    onCancel() {
+
+    },
+  });
+  }
+
+  renameClick = (e, data, target) => {
+    e.stopPropagation();
+    this.props.updateRename();
+  }
+
+  propertyClick = (e, data, target) => {
+    let path = target.getAttribute('path');
+    let project = target.getAttribute('project');
+    e.stopPropagation();
+    axios.get(window.url + '/project/' + project + '/attribute/path/', {
       params: {
         path: path
       }
     })
     .then((msg) => {
       if (msg.data["code"] == 1) {
-        message.success("Delete folder: (" + path + ") successfully");
+        let arr = path.split('/');
+        Modal.info({
+         title: 'Folder: ' + arr[arr.length - 1],
+         content: (
+           <div>
+             <p>Size: {msg.data["message"]["size"]}KB <br/>
+                Create Time: {msg.data["message"]["create_time"]}<br/>
+                Access Time: {msg.data["message"]["access_time"]}<br/>
+                Modify Time: {msg.data["message"]["modify_time"]}</p>
+           </div>
+         ),
+         onOk() {},
+       });
       } else {
         message.error("Error code :" + msg.data["code"] + ", " + msg.data["message"]);
       }
-      _this.props.updateProjectInfo();
     })
     .catch((error) => {
-      message.error("Server error!");
+      message.error(error.toString())
     });
-    _this.props.updateProjectInfo();
-  }
-
-  renameClick = (e, data, target) => {
-    e.stopPropagation();
-    this.props.updateRename();
   }
 
   render() {
@@ -67,7 +113,7 @@ class FileContextMenu extends Component {
             </Menu.Item>
           </Menu>
         </MenuItem>
-        <MenuItem data={{foo: 'bar'}} onClick={this.handleClick}>
+        <MenuItem data={{foo: 'bar'}} onClick={this.propertyClick}>
           <Menu selectable={false}>
             <Menu.Item key="0" className="none-select">
               <Icon type="profile" />Property

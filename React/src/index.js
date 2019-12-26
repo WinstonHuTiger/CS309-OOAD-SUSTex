@@ -6,7 +6,7 @@ import axios from 'axios';
 import Router from './Router';
 
 axios.defaults.withCredentials = true
-window.url = "http://10.17.61.29:8000";
+window.url = "http://127.0.0.1:8000";
 ReactDOM.render(
   <Router/>
   ,document.getElementById('root'));

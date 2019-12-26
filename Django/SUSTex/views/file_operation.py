@@ -313,14 +313,10 @@ def get_file_attribute(request, random_str):
         path = os.path.join(path, name)
     project_path = os.path.join(USER_FILES_DIR, random_str)
     path = os.path.join(project_path, path)
-    if not os.path.isdir(path):
+    if not os.path.isfile(path):
         return get_response(ResponseType.DOCUMENT_NOT_FOUND)
-    size = 0
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            size += os.path.getsize(os.path.join(root, f))
     ret = {
-        "size": int(size / 1024),
+        "size": int(os.path.getsize(path) / 1024),
         "access_time": trans_time(os.path.getatime(path)),
         "create_time": trans_time(os.path.getctime(path)),
         "modify_time": trans_time(os.path.getmtime(path))

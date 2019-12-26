@@ -24,7 +24,7 @@ var startTime;
 const triggerStyle = {
   position: 'absolute',
   top: '50%',
-  zIndex: '9999',
+  zIndex: '100',
   background: '#FFF',
   width: '20px',
   height: '50px',
@@ -422,6 +422,106 @@ class Folder extends Component {
   }
 }
 
+class File extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      updateProjectInfo: props.updateProjectInfo,
+      rename: false
+    }
+  }
+
+  updateRename = () => {
+    this.setState({
+      rename: true
+    });
+  }
+
+  handleClick = (e) => {
+    e.stopPropagation();
+  }
+
+  renameEnd = (e) => {
+    this.setState({
+      rename: false
+    });
+    let newName = e.target.value;
+    let path = this.props.path;
+    let name = this.props.item["filename"];
+    let project = this.props.project;
+    const _this = this;
+    axios.get(window.url + '/project/' + project + '/rename/file/', {
+      params: {
+        path: path,
+        name: name,
+        new_name: newName
+      }
+    })
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        message.success("Rename File: " + name + " successfully");
+      } else {
+        message.error("Error code :" + msg.data["code"] + ", " + msg.data["message"]);
+      }
+      _this.props.updateProjectInfo();
+    })
+    .catch((error) => {
+      message.error("Server error!");
+    });
+    _this.props.updateProjectInfo();
+  }
+
+  getFileType = (type) => {
+    switch(type) {
+      case "PDF":
+        return "file-pdf";
+      case "Markdown":
+        return "file-markdown";
+      case "Bib":
+      case "LaTex":
+      case "Text":
+        return "file-text";
+      case "Zip":
+        return "file-zip";
+      case "Image":
+        return "file-image";
+      default:
+        return "file-unknown"
+    }
+  }
+
+  render() {
+    const item = this.props.item;
+    const path = this.props.path;
+    const name = this.props.item["filename"];
+    const project = this.props.project;
+    return(
+      <>
+        <ContextMenuTrigger id={path + item["filename"] +"-file"}
+        attributes={{'path': path, 'name': name, 'project': project}}>
+        <div>
+          <span className="none-select">
+            <Icon type={this.getFileType(item["type"])} />{this.state.rename?(
+              <Input
+              onClick={this.handleClick}
+              onBlur={this.renameEnd}
+              onPressEnter={this.renameEnd}
+              className="rename-input"
+              defaultValue={item["filename"]}
+              autoFocus/>
+            ):(item["filename"])}
+          </span>
+        </div>
+        </ContextMenuTrigger>
+        <ContextMenu id={path + item["filename"] + "-file"} className="contextMenu">
+          <FileContextMenu updateProjectInfo={this.props.updateProjectInfo}
+          updateRename={this.updateRename}/>
+        </ContextMenu>
+      </>
+    );
+  }
+}
+
 class FileManagement extends Component {
   constructor(props) {
     super(props);
@@ -457,25 +557,6 @@ class FileManagement extends Component {
     });
   };
 
-  getFileType = (type) => {
-    switch(type) {
-      case "PDF":
-        return "file-pdf";
-      case "Markdown":
-        return "file-markdown";
-      case "Bib":
-      case "LaTex":
-      case "Text":
-        return "file-text";
-      case "Zip":
-        return "file-zip";
-      case "Image":
-        return "file-image";
-      default:
-        return "file-unknown"
-    }
-  }
-
   renderDir = (files) => {
     if (files == null) {
       return null;
@@ -498,13 +579,12 @@ class FileManagement extends Component {
         </SubMenu>)}
         {files["files"].map((item, index) =>
             <Menu.Item key={files["path"] + "/" + item["filename"]} className="file-item">
-              <ContextMenuTrigger id="file" attributes={{'info': 'file'}}>
-                <div>
-                  <span className="none-select">
-                    <Icon type={this.getFileType(item["type"])} />{item["filename"]}
-                  </span>
-                </div>
-              </ContextMenuTrigger>
+              <File
+              item={item}
+              path={files["path"]}
+              updateProjectInfo={this.props.updateProjectInfo}
+              project={this.props.project}
+              />
             </Menu.Item>
         )}
       </Menu>
@@ -540,9 +620,6 @@ class FileManagement extends Component {
             />
             {files}
         </div>
-        <ContextMenu id="file" className="contextMenu">
-          <FileContextMenu />
-        </ContextMenu>
       </Sider>
       </>
       );
