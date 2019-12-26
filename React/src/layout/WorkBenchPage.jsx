@@ -416,6 +416,7 @@ class ProjectCard extends Component {
     });
     let re = [];
     let i;
+    const _this = this;
     for (i = 0; i < this.changes.length; i++) {
       if (this.changes[i] != undefined) {
         let item = this.props.projectInfo["users"][i];

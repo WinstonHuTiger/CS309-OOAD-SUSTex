@@ -296,6 +296,8 @@ html, body {
 
 .workbench-container {
   padding: 20px;
+  overflow-y: auto;
+  height: 80vh;
 }
 
 .project-card-menu {
