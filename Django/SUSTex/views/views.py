@@ -347,6 +347,14 @@ def search_user(request):
 
 
 def add_collaborator(request):
+    '''Check user cookie first, check the requested project exist,
+    check user to invite exist and not have access to the project
+    or be invited yet,
+    then create invitation object in the database
+
+    :param request: request from client
+    :return: success response with invitation sending info or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     users = json.loads(request.GET["users"])
