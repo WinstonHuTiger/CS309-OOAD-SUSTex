@@ -276,6 +276,7 @@ html, body {
   box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.14);
   border-radius: 10px;
   background: #fff;
+  overflow-y: auto;
 }
 
 .workbench-menu {
@@ -436,6 +437,7 @@ html, body {
 .project-menu {
   margin-top: 64px;
   height: calc(100vh - 64px);
+  overflow-y: auto;
 }
 
 .project-card-open {

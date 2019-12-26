@@ -4,7 +4,7 @@ import { Row, Col } from 'antd';
 import axios from 'axios';
 import NProgress from '../tools/nprogress';
 import Header from './Header';
-import { Menu, Button, Popover, Icon, Input } from 'antd';
+import { Menu, Button, Popover, Icon, Input, Modal } from 'antd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import FileContextMenu from '../components/FileContextMenu';
 import FolderContextMenu from '../components/FolderContextMenu';
@@ -19,6 +19,7 @@ import { Resizable } from "re-resizable";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 const { Search } = Input;
+const { Dragger } = Modal;
 var startTime;
 
 const triggerStyle = {
@@ -531,6 +532,7 @@ class FileManagement extends Component {
       collapsed: false,
       modalIsOpen: true,
       leftShow: false,
+      fileList: [],
     }
   }
 
@@ -592,6 +594,82 @@ class FileManagement extends Component {
     );
   }
 
+  onFileChange = (info) => {
+    let re = [info.file];
+    const { status } = info.file;
+    if (status == "removed"){
+      re = [];
+    } else if (status === 'done') {
+      let arr = info.file.name.split('.')
+      let prefix = arr[arr.length - 1];
+      if (prefix != "zip") {
+        message.error("Invalid file type, please upload Zip file.");
+        re = [];
+      } else {
+        if (info.file.response["code"] == 1) {
+          message.success(`${info.file.name} file uploaded successfully.`);
+          this.updateProjectInfo();
+          this.zipOk();
+        } else if (info.file.response["code"] == 2) {
+          message.error("Error code " + info.file.response["code"] + ": " + info.file.response["message"]);
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        } else {
+          message.error("File corrupted! Please check it.")
+        }
+      }
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+    this.setState({
+      fileList: re
+    });
+  }
+
+  uploadProps = {
+    multiple: false,
+    headers: {
+      Authorization: '$prefix $token',
+    },
+    customRequest({
+      action,
+      data,
+      file,
+      filename,
+      headers,
+      onError,
+      onProgress,
+      onSuccess,
+      withCredentials,
+    }) {
+      // EXAMPLE: post form-data with 'axios'
+      const formData = new FormData();
+      if (data) {
+        Object.keys(data).forEach(key => {
+          formData.append(key, data[key]);
+        });
+      }
+      formData.append(filename, file);
+      axios
+        .post(action, formData, {
+          headers,
+          onUploadProgress: ({ total, loaded }) => {
+            onProgress({ percent: Math.round(loaded / total * 100).toFixed(2) }, file);
+          },
+        })
+        .then(({ data: response }) => {
+          onSuccess(response, file);
+        })
+        .catch(onError);
+      return {
+        abort() {
+          console.log('upload progress is aborted.');
+        },
+      };
+    },
+  };
+
   render(){
     const files = this.renderDir(this.props.files);
       return(
@@ -621,6 +699,26 @@ class FileManagement extends Component {
             />
             {files}
         </div>
+        <Modal
+          title="Upload File"
+          visible={this.state.zipProject}
+          onOk={this.zipOk}
+          onCancel={this.zipOk}
+        >
+          <Dragger
+          fileList={this.state.fileList}
+          onChange={this.onFileChange}
+          action={window.url + "/project/import/"}
+          {...this.uploadProps}>
+            <p className="ant-upload-drag-icon">
+              <Icon type="inbox" />
+            </p>
+            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+            <p className="ant-upload-hint">
+              Only support one zip file.
+            </p>
+          </Dragger>
+        </Modal>
       </Sider>
       </>
       );

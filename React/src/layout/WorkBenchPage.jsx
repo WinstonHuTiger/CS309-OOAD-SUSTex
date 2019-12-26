@@ -286,9 +286,7 @@ class ProjectCard extends Component {
         _this.props.updateProjectInfo();
       } else if (msg.data["code"] == 2) {
          message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
-         setTimeout(() => {
-           window.location.reload();
-         }, 300);
+         _this.props.uploadProject()
       } else {
         message.error("Error code: " + msg.data["code"] + ", " + msg.data["message"])
       }
@@ -373,10 +371,12 @@ class ProjectCard extends Component {
           for (i = 0; i < arr.length; i++) {
             message.success("Invite user " + arr[i]["alias"] + "(" + arr[i]["id"] + ") successfully!");
           }
+        } else {
+          message.error("Error code" + msg.data["code"] + ": " + msg.data["message"]);
         }
       })
       .catch((error) => {
-        console.log(error);
+        message.error(error.toString());
       });
       _this.setState({
         inviteVisiable: false,
@@ -435,9 +435,7 @@ class ProjectCard extends Component {
       .then((msg) => {
         if (msg.data["code"] == 1) {
           message.success("Change project authority successfully!");
-          setTimeout(() => {
-            window.location.reload();
-          }, 300);
+          _this.props.updateProjectInfo();
         } else if (msg.data["code"] == 2) {
           message.error("Error code " + msg.data["code"] + ": " + msg.data["message"]);
           setTimeout(() => {
