@@ -61,7 +61,6 @@ def create_file(request, random_str):
 
 
 def create_path(request, random_str):
-    print(BASE_DIR)
     path = request.GET['path'].split('/')
     verify = file_manage_verify(request, random_str)
     if verify is not None:
@@ -96,11 +95,12 @@ def delete_path(request, random_str):
         return verify
     project_path = os.path.join(USER_FILES_DIR, random_str)
     project_path = os.path.join(project_path, path)
+    print(project_path)
     if os.path.isdir(project_path):
         import shutil
         shutil.rmtree(project_path)
-        return HttpResponse('Remove folder successfully')
-    return HttpResponse('This path does not exist')
+        return get_response(ResponseType.SUCCESS, 'Remove folder successfully!')
+    return get_response(ResponseType.SUCCESS, 'This path does not exist')
 
 
 def upload_file(request, random_str):
@@ -137,7 +137,7 @@ def rename_file(request, random_str):
 
 def rename_path(request, random_str):
     path = request.GET['path'].split("/")
-    new_name = request.GET['new_name']
+    new_name = request.GET['name']
     verify = file_manage_verify(request, random_str)
     if verify is not None:
         return verify
@@ -148,8 +148,8 @@ def rename_path(request, random_str):
     new_path = os.path.join(project_path, new_name)
     if os.path.isdir(old_path):
         os.rename(old_path, new_path)
-        return HttpResponse("Rename Successfully")
-    return HttpResponse('This path does not exist')
+        return get_response(ResponseType.SUCCESS, "Rename Successfully")
+    return get_response(ResponseType.SUCCESS, 'This path does not exist')
 
 
 def download_file(request, random_str):
@@ -191,7 +191,6 @@ def compile_pdf(request, random_str):
     if os.path.isfile(filepath):
         try:
             cmd = ['pdflatex', '-quiet', filepath, '-aux-directory=%s' % os.path.join(project_path, 'log')]
-            print(cmd)
             p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
             content = p.stdout.read().decode('utf8')
             lines = content.split('\r\n')

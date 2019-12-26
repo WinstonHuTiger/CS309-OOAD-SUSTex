@@ -459,3 +459,40 @@ html, body {
 .show {
   opacity: 1;
 }
+
+.file-item, .folder .ant-menu-submenu-title {
+  height: 24px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  margin: 2px 0 !important;
+}
+
+.file-item div {
+  width: 100%;
+  height: 100%;
+}
+
+.file-item span {
+  position: relative;
+  top: -8px;
+}
+
+.folder div {
+  width: 100%;
+  height: 100%;
+}
+
+.folder div {
+  width: 100%;
+  height: 100%;
+}
+
+.folder span {
+  position: relative;
+  top: -10px;
+}
+
+.rename-input {
+  height: 22px !important;
+  width: 80%;
+}

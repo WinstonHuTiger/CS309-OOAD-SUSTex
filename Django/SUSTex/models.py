@@ -18,7 +18,7 @@ def list_dir(path, res):
     for i in os.listdir(path):
         temp_dir = os.path.join(path, i)
         if os.path.isdir(temp_dir):
-            temp = {"dirname": i, "child_dirs": [], "files": []}
+            temp = {"dirname": i, "child_dirs": [], "files": [], "path": os.path.join(res["path"], i)}
             res['child_dirs'].append(list_dir(temp_dir, temp))
         else:
             _type = 'unknown'
@@ -31,6 +31,12 @@ def list_dir(path, res):
                 _type = 'Image'
             elif postfix == 'pdf':
                 _type = 'PDF'
+            elif postfix == 'txt':
+                _type = 'Text'
+            elif postfix == "zip":
+                _type = "Zip"
+            elif postfix == "bib":
+                _type = "Bib"
             mtime = os.stat(temp_dir).st_mtime
             file_modify_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(mtime))
             file = {"filename": i, "type": _type, 'last_modify': file_modify_time}
@@ -131,7 +137,7 @@ class Project(models.Model):
 
     def get_info(self):
         path = os.path.join(BASE_DIR, 'UserData/Projects/%s' % self.random_str)
-        res = {'child_dirs': [], 'files': []}
+        res = {'child_dirs': [], 'files': [], 'path': ''}
         list_dir(path, res)
         re = {
             'name': self.name,

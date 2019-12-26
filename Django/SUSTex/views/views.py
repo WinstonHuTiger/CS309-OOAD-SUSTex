@@ -142,7 +142,8 @@ def create_doc(request, random_str):
 
 
 def get_project_info(request, random_str):
-    print(random_str)
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)

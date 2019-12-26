@@ -6,6 +6,8 @@ import NProgress from '../tools/nprogress';
 import Header from './Header';
 import { Menu, Button, Popover, Icon, Input } from 'antd';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import FileContextMenu from '../components/FileContextMenu';
+import FolderContextMenu from '../components/FolderContextMenu';
 import Lightbox from 'react-lightbox-component';
 import './css/lightbox.css';
 import './css/custom.css';
@@ -344,12 +346,88 @@ class MainContent extends Component {
   }
 }
 
+class Folder extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      updateProjectInfo: props.updateProjectInfo,
+      rename: false
+    }
+  }
+
+  updateRename = () => {
+    this.setState({
+      rename: true
+    });
+  }
+
+  handleClick = (e) => {
+    e.stopPropagation();
+  }
+
+  renameEnd = (e) => {
+    this.setState({
+      rename: false
+    });
+    let name = e.target.value;
+    let path = this.props.item["path"];
+    let project = this.props.project;
+    const _this = this;
+    axios.get(window.url + '/project/' + project + '/rename/path/', {
+      params: {
+        path: path,
+        name: name,
+      }
+    })
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        message.success("Rename folder: (" + path + ") successfully");
+      } else {
+        message.error("Error code :" + msg.data["code"] + ", " + msg.data["message"]);
+      }
+      _this.props.updateProjectInfo();
+    })
+    .catch((error) => {
+      message.error("Server error!");
+    });
+    _this.props.updateProjectInfo();
+  }
+
+  render() {
+    const item = this.props.item;
+    return(
+      <>
+        <ContextMenuTrigger id="folder"
+        attributes={{'path': item["path"], 'project': this.props.project}}>
+          <div>
+            <span className="none-select">
+              <Icon type="folder" />{this.state.rename?(
+                <Input
+                onClick={this.handleClick}
+                onBlur={this.renameEnd}
+                onPressEnter={this.renameEnd}
+                className="rename-input"
+                defaultValue={item["dirname"]}
+                autoFocus/>
+              ):(item["dirname"])}
+            </span>
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenu id="folder" className="contextMenu">
+          <FolderContextMenu updateProjectInfo={this.props.updateProjectInfo}
+          updateRename={this.updateRename}/>
+        </ContextMenu>
+      </>
+    );
+  }
+}
+
 class FileManagement extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: true,
-      collapsed: true,
+      collapsed: false,
       modalIsOpen: true,
       leftShow: false,
     }
@@ -379,15 +457,62 @@ class FileManagement extends Component {
     });
   };
 
-  renderDir = () => {
-
+  getFileType = (type) => {
+    switch(type) {
+      case "PDF":
+        return "file-pdf";
+      case "Markdown":
+        return "file-markdown";
+      case "Bib":
+      case "LaTex":
+      case "Text":
+        return "file-text";
+      case "Zip":
+        return "file-zip";
+      case "Image":
+        return "file-image";
+      default:
+        return "file-unknown"
+    }
   }
 
-  renderFile = () => {
-    
+  renderDir = (files) => {
+    if (files == null) {
+      return null;
+    }
+    return(
+      <Menu
+        mode="inline"
+        >
+      {files["child_dirs"].map((item, index) =>
+        <SubMenu
+          className="folder"
+          key={item["dirname"]}
+          title={
+            <Folder item={item}
+            updateProjectInfo={this.props.updateProjectInfo}
+            project={this.props.project}/>
+          }
+        >
+        {this.renderDir(item)}
+        </SubMenu>)}
+        {files["files"].map((item, index) =>
+            <Menu.Item key={files["path"] + "/" + item["filename"]} className="file-item">
+              <ContextMenuTrigger id="file" attributes={{'info': 'file'}}>
+                <div>
+                  <span className="none-select">
+                    <Icon type={this.getFileType(item["type"])} />{item["filename"]}
+                  </span>
+                </div>
+              </ContextMenuTrigger>
+            </Menu.Item>
+        )}
+      </Menu>
+    );
   }
 
   render(){
+    const files = this.renderDir(this.props.files);
       return(
         <>
         <Button
@@ -407,30 +532,33 @@ class FileManagement extends Component {
         collapsedWidth="0"
         width="250px"
         trigger={null}>
-          <Menu theme="light"
-          mode="inline"
-          defaultOpenKeys={['/img']}
-          defaultSelectedKeys={['/markdown.md']}
-          className="project-menu"
-          >
+          <div className="project-menu">
             <Search
               placeholder="Search File"
               onSearch={value => console.log(value)}
               style={{ width: '230px', margin: '10px', zIndex: 0 }}
             />
-        </Menu>
+            {files}
+        </div>
+        <ContextMenu id="file" className="contextMenu">
+          <FileContextMenu />
+        </ContextMenu>
       </Sider>
       </>
       );
   }
 }
 
+
+
 class ProjectPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
       userInfo: null,
-      projectInfo: null
+      projectInfo: null,
+      files: null,
+      project: null
     };
   }
 
@@ -477,9 +605,12 @@ class ProjectPage extends Component {
       console.log(msg);
       if (msg.data["code"] == 1) {
         _this.setState({
-          projectInfo: msg.data["message"]
+          projectInfo: msg.data["message"],
+          files: msg.data["message"]["files"],
+          project: msg.data["message"]["random_str"]
         });
-        console.log(msg.data["message"]["files"])
+        console.log("PROJECT")
+        console.log(msg.data["message"])
       } else if (msg.data["code"] == 2) {
 
       } else {
@@ -498,7 +629,9 @@ class ProjectPage extends Component {
           <Layout>
             <FileManagement
               updateProjectInfo={this.updateProjectInfo}
-              projectInfo={this.state.projectInfo}/>
+              projectInfo={this.state.projectInfo}
+              project={this.state.project}
+              files={this.state.files}/>
           </Layout>
       </Layout>
     );
