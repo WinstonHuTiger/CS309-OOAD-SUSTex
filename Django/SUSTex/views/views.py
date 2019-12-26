@@ -110,6 +110,12 @@ def logout(request):
 
 
 def get_user_info(request):
+    '''Check user cookie first,
+    then retrieve user's info
+
+    :param request: request from client
+    :return: user's info in dictionary or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     user = User.objects.get(id=request.user.id)
@@ -117,6 +123,13 @@ def get_user_info(request):
 
 
 def create_project(request):
+    '''Check user cookie first,
+    then create an object respectively in Project and
+    UserProject table
+
+    :param request: request from client
+    :return: the created project info or error response
+    '''
     project_name = request.GET['name']
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
@@ -133,18 +146,39 @@ def create_project(request):
 
 
 def create_doc(request, random_str):
+    '''Check user cookie first, check the requested project exist,
+    check if the type of file is permitted,
+    then create a document in project
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :return: success response or error response
+    '''
     filename = request.GET['filename']
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
+    lst = filename.split('.')
+    if len(lst) == 1:
+        return get_response(ResponseType.FILE_CORRUPTED, 'You cannot create a file without a postfix')
+    postfix = lst[-1]
+    if postfix not in ALLOWED_POSTFIX:
+        return get_response(ResponseType.FILE_CORRUPTED, 'File postfix not allowed')
     project = response[0]
     project.create_document(filename)
     return get_response(ResponseType.SUCCESS, "Create document successfully!")
 
 
 def get_project_info(request, random_str):
+    '''Check user cookie first, check the requested project exist,
+    then return basic info of the project
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :return: basic info of the project or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
@@ -156,6 +190,12 @@ def get_project_info(request, random_str):
 
 
 def get_user_projects(request):
+    '''Check user cookie first,
+    then return a list of the users' projects
+
+    :param request: request from client
+    :return: a list of the users' projects or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     user = User.objects.get(id=request.user.id)
@@ -167,6 +207,15 @@ def get_user_projects(request):
 
 
 def get_versions(request, random_str, filename):
+    '''Check user cookie first, check the requested project exist,
+    check file is in the project,
+    then return a list of versions
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :param filename: requested filename
+    :return: a list of versions or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
@@ -183,9 +232,17 @@ def get_versions(request, random_str, filename):
 
 
 def compare_versions(request, random_str, filename):
+    '''Check user cookie first, check the requested project exist,
+    check file is in the project, check if requested version existed,
+    then compare and return the differences in .json
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :param filename: requested filename
+    :return: the differences in .json or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
-    user = User.objects.get(id=request.user.id)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
