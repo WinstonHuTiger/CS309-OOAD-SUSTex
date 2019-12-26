@@ -1,5 +1,4 @@
 """mysite URL Configuration
-
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
 Examples:
@@ -84,5 +83,7 @@ urlpatterns = [
     # <database> get list of users
     path('user/search/', views.search_user),
     # <database> invite users to a project
-    path('user/invitation/', views.handel_invitation)
+    path('user/invitation/', views.handel_invitation),
+    path('project/<str:random_str>/attribute/path/', file_operation.get_path_attribute),
+    path('project/<str:random_str>/attribute/file/', file_operation.get_path_attribute)
 ]
