@@ -315,6 +315,13 @@ def delete_project(request, random_str):
 
 
 def search_user(request):
+    '''Check user cookie first, check the requested project exist,
+    then find requested users' ids and return a list of users
+    with their basic info
+
+    :param request: request from client
+    :return: list of users with their basic info
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
     random_id = request.GET["user"]
