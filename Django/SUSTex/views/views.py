@@ -6,8 +6,10 @@ from Utils.diff_match_patch import diff_match_patch
 import json
 import os
 from enum import Enum, unique
+# from file_operation import ALLOWED_POSTFIX
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir), os.path.pardir))
+ALLOWED_POSTFIX = ['tex', 'bib', 'txt', 'md']
 
 @unique
 class ResponseType(Enum):
@@ -23,6 +25,7 @@ class ResponseType(Enum):
     FILE_CORRUPTED = 10
     DELETE_ERROR = 11
     USER_NOT_FOUND = 12
+    FILE_OPEN_ERROR = 13
 
 
 def get_response(res_type, message=None):
@@ -210,18 +213,38 @@ def compare_versions(request, random_str, filename):
 
 
 def create_version(request, random_str, filename):
+    '''Check user cookie first, check project and file exists,
+    check file is in the project,
+    then create a version of file in the project item
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :param filename: requested filename
+    :return: success response or error response
+    '''
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
     project = response[0]
+    response = Document.objects.filter(filename=filename, project=project)
+    if response.count() == 0:
+        return get_response(ResponseType.DOCUMENT_NOT_FOUND)
     project.create_version(filename)
     return get_response(ResponseType.SUCCESS, "Create version successfully!")
 
 
 def rename_project(request, random_str):
+    '''Check user cookie first, check the requested project exists,
+    change the name of project item
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :return: success response or error response
+    '''
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
-    user = User.objects.get(id=request.user.id)
     response = Project.objects.filter(random_str=random_str)
     if response.count() == 0:
         return get_response(ResponseType.PROJECT_NOT_FOUND)
@@ -232,6 +255,14 @@ def rename_project(request, random_str):
 
 
 def get_doc_info(request, random_str):
+    '''Check user cookie first, check the requested project exists,
+    check file is in the project,
+    then collect and return basic info from the latest version
+
+    :param request: request from client
+    :param random_str: indicator of a project
+    :return: basic info of a file (filename, last_modify, content, version)
+    '''
     filename = request.GET['filename']
     if not request.user.is_authenticated:
         return get_response(ResponseType.NOT_AUTHENTICATED)
@@ -254,6 +285,13 @@ def get_doc_info(request, random_str):
 
 
 def get_latex_templates(request):
+    '''Open latex templates directory on the disc,
+    go through all the subdirectories and collect templates' info
+    and return a list of templates with their info
+
+    :param request: request from client
+    :return: a list of templates with their info
+    '''
     path = os.path.join(BASE_DIR, 'static/LaTex')
     lst = []
     idx = 0
@@ -270,13 +308,17 @@ def get_latex_templates(request):
         for j in os.listdir(temp_path):
             tp = os.path.join(temp_path, j)
             tp = os.path.join(tp, 'reference.txt')
-            f = open(tp, 'r')
             idx += 1
-            re['list'].append({
-                'title': j,
-                'reference': f.readlines()[0],
-                'index': idx
-            })
+            try:
+                f = open(tp, 'r')
+            except OSError:
+                return get_response(ResponseType.FILE_OPEN_ERROR)
+            with f:
+                re['list'].append({
+                    'title': j,
+                    'reference': f.readlines()[0],
+                    'index': idx
+                })
     return get_response(ResponseType.SUCCESS, lst)
 
 
@@ -394,6 +436,14 @@ def add_collaborator(request):
 
 
 def handel_invitation(request):
+    '''Check user cookie first, check that user and invitation is matched,
+    check if user accepts invitation,
+    if so then add an item of user and project into UserProject table,
+    then delete invitation item
+
+    :param request:
+    :return: success response or error response
+    '''
     _id = request.GET['id']
     action = request.GET["action"]
     if not request.user.is_authenticated:
@@ -409,6 +459,14 @@ def handel_invitation(request):
 
 
 def change_authority(request):
+    '''Check user cookie first, check project and users exist,
+    check that users are in project,
+    if 'remove', delete item in UserProject table
+    else refresh authority
+
+    :param request:
+    :return: success response or error response
+    '''
     print(request.GET)
     random_str = request.GET["project"]
     users = json.loads(request.GET["users"])
