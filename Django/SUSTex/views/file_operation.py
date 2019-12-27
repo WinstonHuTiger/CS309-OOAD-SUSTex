@@ -377,7 +377,7 @@ def load_file(request, random_str):
     filepath = os.path.join(project_path, path)
     filepath = os.path.join(filepath, filename)
     postfix = filename.split('.')[-1]
-    if postfix == "tex" or postfix == "md" or postfix == "txt":
+    if postfix == "tex" or postfix == "md" or postfix == "txt" or postfix == "bib":
         if os.path.isfile(filepath):
             content = open(filepath, 'r').read()
             return get_response(ResponseType.SUCCESS, content)

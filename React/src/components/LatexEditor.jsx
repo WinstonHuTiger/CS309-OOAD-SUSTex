@@ -1,6 +1,6 @@
 /* eslint  no-unused-vars: "off" */
 import CodeMirror from 'codemirror/lib/codemirror.js';
-import React, { Component, message } from 'react';
+import React, { Component } from 'react';
 import CodeMirrorGrammar from '../tools/CodeMirrorGrammar';
 import '../tools/show-hint.js';
 import 'codemirror/addon/fold/foldcode.js';
@@ -9,7 +9,7 @@ import 'codemirror/addon/fold/foldgutter.css';
 import '../grammar/latex.js';
 import './editor-theme/base16-tomorrow-light.less';
 import CodeMirrorSpellChecker from 'codemirror-spell-checker';
-import { Select } from 'antd';
+import { Select, message, Icon, Button } from 'antd';
 import axios from 'axios';
 
 const { Option } = Select;
@@ -203,7 +203,7 @@ class LatexEditor extends Component {
         CodeMirror.showHint(cm, latex_mode.autocompleter, {prefixMatch:true, caseInsensitiveMatch:true});
     };
     CodeMirror.commands['save'] = function( cm ) {
-        
+
     };
     // this also works (takes priority if set)
     latex_mode.autocompleter.options = {prefixMatch:true, caseInsensitiveMatch:false};
@@ -219,7 +219,7 @@ class LatexEditor extends Component {
         lineWrapping: true,
         lint: true,  // enable lint validation
         matching: true,  // enable token matching, e.g braces, tags etc..
-        extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment", "Ctrl+S": "save"},
+        extraKeys: {"Ctrl-Space": 'my_autocompletion', "Ctrl-L": "toggleComment"},
         foldGutter: true,
         theme: "base16-tomorrow-light",
         gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
@@ -266,13 +266,19 @@ class LatexEditor extends Component {
       }
      }
    });
-   axios.get(window.url + '/project/' + this.props.project + '/document')
+   axios.get(window.url + '/project/' + this.props.project + '/file/load/', {
+     params: {
+       path: _this.props.path,
+       name: _this.props.name
+     }
+   })
    .then((msg) => {
      if (msg.data["code"] == 1) {
        _this.setState({
-         text: msg.data["message"]["content"],
+         text: msg.data["message"],
        });
-       _this.cm.setValue(msg.data["message"]["content"]);
+       _this.cm.setValue(msg.data["message"]);
+       message.success("Load file successfully!");
      } else {
        message.error("Error code:" + msg.data["code"] + ", " + msg.data["message"]);
      }
@@ -281,9 +287,46 @@ class LatexEditor extends Component {
 
    });
   };
+  saveFile = () => {
+    const _this = this;
+    console.log(window.url + '/project/' + this.props.project + '/file/save/')
+    console.log(_this.props.name)
+    axios.post(window.url + '/project/' + this.props.project + '/save/file/file/'
+    + '?path=' + _this.props.path + '&doc=' + _this.state.text + '&name=' + _this.props.name)
+    .then((msg) => {
+      if (msg.data["code"] == 1) {
+        message.success("Save file successfully!");
+      } else {
+        message.error("Error code:" + msg.data["code"] + ", " + msg.data["message"]);
+      }
+    })
+    .catch((error) => {
+
+    });
+  }
+
+  bold = () => {
+    this.cm.replaceSelection("\\textbf{}");
+  }
+
+  italic = () => {
+    this.cm.replaceSelection("\\textit{}");
+  }
+
+  underline = () => {
+    this.cm.replaceSelection("\\underline{}");
+  }
+
   ref = React.createRef();
   render = () => (
     <>
+      <div className="tool-bar">
+        <Button icon="save" onClick={this.saveFile}></Button>
+        <Button icon="bold" onClick={this.bold}></Button>
+        <Button icon="italic" onClick={this.italic}></Button>
+        <Button icon="underline" onClick={this.underline}></Button>
+        <Button onClick={this.props.compile}>Compile</Button>
+      </div>
       <div
         className="editor"
         ref={self => this.editor = self}

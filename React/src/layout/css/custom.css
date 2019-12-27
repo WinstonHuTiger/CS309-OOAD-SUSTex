@@ -503,10 +503,10 @@ html, body {
 }
 
 .editor {
-  margin-top: 64px;
   overflow: hidden;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 99px);
   width: 50%;
+  margin-left: 1px;
 }
 
 .iframe-container-editor {
@@ -514,4 +514,16 @@ html, body {
   position: relative;
   width: 100%;
   height: calc(100vh - 64px);
+}
+
+.tool-bar {
+  padding-left: 2px;
+  margin-top: 64px;
+  height: 35px;
+  background: #FEFEFE;
+  width: 50%;
+}
+
+.tool-bar .ant-btn-icon-only, .tool-bar .ant-btn {
+  margin-left: 2px;
 }

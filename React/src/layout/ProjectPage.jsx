@@ -741,6 +741,21 @@ class FileManagement extends Component {
 }
 
 class Editor extends Component {
+  compile = () => {
+    const _this = this;
+    axios.get(window.url + '/project/' + this.props.project + '/compile/',{
+      params: {
+        name: _this.props.name,
+        path: _this.props.path
+      }
+    })
+    .then((msg) => {
+      console.log(msg)
+    })
+    .catch((error)=>{
+
+    })
+  }
   render() {
     let path = this.props.path;
     let name = this.props.name;
@@ -749,17 +764,16 @@ class Editor extends Component {
     var content = null;
     let arr = name.split('.');
     let postfix = arr[arr.length - 1];
-    if (path == "" && name == "main.tex") {
+    if (postfix == "md" || postfix == "tex" || postfix == "txt" || postfix == "bib") {
       content = (
         <div style={{width:"100%"}}>
-          <LatexEditor socket={this.props.socket}
-            project={this.props.project}/>
+          <LatexEditor
+            path={this.props.path}
+            name={this.props.name}
+            project={this.props.project}
+            compile={this.compile}/>
         </div>
       )
-    } else if (postfix == "md") {
-      content = <MarkdownEditor path={this.props.path} name={this.props.name}/>
-    } else if (postfix == "txt") {
-      content = <></>
     } else {
       return (
         <div className="not-support none-select">
@@ -779,18 +793,6 @@ class ProjectPage extends Component {
   constructor(props) {
     super(props);
     let random_str = props.match["params"]["random_str"];
-    let endpoint = window.ws + '/project/' + random_str + '/'
-    let socket = new WebSocket(endpoint);
-    socket.onopen = (e) => {
-      console.log("open", e);
-    };
-    socket.onerror = (e) => {
-      console.log("error", e);
-    };
-    socket.onclose = (e) => {
-      console.log("close", e);
-    };
-    this.socket = socket;
     this.state = {
       userInfo: null,
       projectInfo: null,
@@ -798,6 +800,7 @@ class ProjectPage extends Component {
       project: null,
       name: null,
       path: null,
+      keyy: 0
     };
   }
 
@@ -871,7 +874,8 @@ class ProjectPage extends Component {
   updatePath = (name, path) => {
     this.setState({
       name: name,
-      path: path
+      path: path,
+      keyy: this.state.keyy + 1
     });
   }
 
@@ -889,10 +893,12 @@ class ProjectPage extends Component {
               project={this.state.project}
               files={this.state.files}
               updatePath={this.updatePath}/>
-            <Editor path={this.state.path}
+            <Editor
+            key={this.state.keyy}
+            path={this.state.path}
             project={this.state.project}
             name={this.state.name}
-            socket={this.socket}/>
+            />
           </Layout>
       </Layout>
     );
