@@ -86,5 +86,7 @@ urlpatterns = [
     path('user/invitation/', views.handel_invitation),
     path('project/<str:random_str>/attribute/path/', file_operation.get_path_attribute),
     path('project/<str:random_str>/attribute/file/', file_operation.get_file_attribute),
-    path('project/<str:random_str>/document/save/', views.save_doc),
+    path('project/<str:random_str>/save/file/', file_operation.save_file),
+    path('project/<str:random_str>/file/load/', file_operation.load_file),
+    path('project/<str:random_str>/save/file/file/', file_operation.save_file)
 ]

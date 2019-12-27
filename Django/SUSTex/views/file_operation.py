@@ -175,44 +175,44 @@ def download_file(request, random_str):
     return HttpResponse('File not exist')
 
 
-def compile_pdf(request, random_str):
-    document = request.GET['document']
-    path = request.GET['path']
-    verify = file_manage_verify(request, random_str)
-    if verify:
-        return verify
-    lst = document.split('.')
-    filename = lst[0]
-    postfix = lst[1]
-    response = Document.objects.filter(filename=filename)
-    if response.count() == 0:
-        return HttpResponse('LaTex Document does not exist')
-    doc = response[0]
-    if postfix != 'tex' or doc.project.type != 'LaTex':
-        return HttpResponse('Not a LaTex document!')
-    project_path = os.path.join(USER_FILES_DIR, random_str)
-    folder_path = os.path.join(project_path, path)
-    filepath = os.path.join(folder_path, document)
-    if os.path.isfile(filepath):
-        try:
-            cmd = ['pdflatex', '-quiet', filepath, '-aux-directory=%s' % os.path.join(project_path, 'log')]
-            p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-            content = p.stdout.read().decode('utf8')
-            lines = content.split('\r\n')
-        except Exception:
-            return HttpResponse('Compile fail')
-        errors = []
-        for line in lines:
-            if line == '':
-                pass
-            else:
-                errors.append(line[line.rfind('/') + 1:])
-                return HttpResponse(json.dumps(line[line.rfind('/') + 1:]))
-        pdf_path = os.path.join(project_path, filename + '.pdf')
-        response = FileResponse(pdf_path)
-        response['Content-Type'] = 'application/pdf'
-        return response
-    return HttpResponse('LaTex Document does not exist')
+# def compile_pdf(request, random_str):
+#     document = request.GET['document']
+#     path = request.GET['path']
+#     verify = file_manage_verify(request, random_str)
+#     if verify:
+#         return verify
+#     lst = document.split('.')
+#     filename = lst[0]
+#     postfix = lst[1]
+#     response = Document.objects.filter(filename=filename)
+#     if response.count() == 0:
+#         return HttpResponse('LaTex Document does not exist')
+#     doc = response[0]
+#     if postfix != 'tex' or doc.project.type != 'LaTex':
+#         return HttpResponse('Not a LaTex document!')
+#     project_path = os.path.join(USER_FILES_DIR, random_str)
+#     folder_path = os.path.join(project_path, path)
+#     filepath = os.path.join(folder_path, document)
+#     if os.path.isfile(filepath):
+#         try:
+#             cmd = ['pdflatex', '-quiet', filepath, '-aux-directory=%s' % os.path.join(project_path, 'log')]
+#             p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+#             content = p.stdout.read().decode('utf8')
+#             lines = content.split('\r\n')
+#         except Exception:
+#             return HttpResponse('Compile fail')
+#         errors = []
+#         for line in lines:
+#             if line == '':
+#                 pass
+#             else:
+#                 errors.append(line[line.rfind('/') + 1:])
+#                 return HttpResponse(json.dumps(line[line.rfind('/') + 1:]))
+#         pdf_path = os.path.join(project_path, filename + '.pdf')
+#         response = FileResponse(pdf_path)
+#         response['Content-Type'] = 'application/pdf'
+#         return response
+#     return HttpResponse('LaTex Document does not exist')
 
 
 # https://stackoverflow.com/questions/67454/serving-dynamically-generated-zip-archives-in-django
@@ -260,7 +260,6 @@ def import_project(request):
         project.save()
         user_project = UserProject(project=project, user=user, type="Creator")
         user_project.save()
-        Document(project=project, content=open(os.path.join(project_path, "main.tex")).read()).save()
     except Exception as e:
         return get_response(ResponseType.FILE_CORRUPTED)
     return get_response(ResponseType.SUCCESS, "Import project successfully!")
@@ -289,7 +288,6 @@ def create_from_template(request):
     project.save()
     user_project = UserProject(project=project, user=user, type="Creator")
     user_project.save()
-    Document(project=project, content=open(os.path.join(project_path, "main.tex")).read()).save()
     return get_response(ResponseType.SUCCESS, "SUCCESS")
 
 
@@ -340,3 +338,109 @@ def get_file_attribute(request, random_str):
         "modify_time": trans_time(os.path.getmtime(path))
     }
     return get_response(ResponseType.SUCCESS, ret)
+
+
+def save_file(request, random_str):
+    path = request.GET["path"]
+    doc = request.GET["doc"]
+    filename = request.GET["name"]
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    user = User.objects.get(id=request.user.id)
+    response = Project.objects.filter(random_str=random_str)
+    user_project = UserProject.objects.get(user)
+    if user_project.authority == 'r':
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    filepath = os.path.join(project_path, path)
+    filepath = os.path.join(filepath, filename)
+    postfix = filename.split('.')[-1]
+    if postfix == "tex" or postfix == "md" or postfix == "txt":
+        if os.path.isfile(filepath):
+            os.remove(filepath)
+            with open(filepath, 'w+') as f:
+                f.write(doc)
+    return get_response(ResponseType.SUCCESS, "Save Successfully")
+
+
+def load_file(request, random_str):
+    path = request.GET["path"]
+    filename = request.GET["name"]
+    if not request.user.is_authenticated:
+        return get_response(ResponseType.NOT_AUTHENTICATED)
+    response = Project.objects.filter(random_str=random_str)
+    if response.count() == 0:
+        return get_response(ResponseType.PROJECT_NOT_FOUND)
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    filepath = os.path.join(project_path, path)
+    filepath = os.path.join(filepath, filename)
+    postfix = filename.split('.')[-1]
+    if postfix == "tex" or postfix == "md" or postfix == "txt":
+        if os.path.isfile(filepath):
+            content = open(filepath, 'r').read()
+            return get_response(ResponseType.SUCCESS, content)
+    return get_response(ResponseType.SORRY)
+
+
+def compile_pdf(request, random_str):
+    document = request.GET['name']
+    path = request.GET['path']
+    verify = file_manage_verify(request, random_str)
+#    if verify:
+#        return verify
+    lst = document.split('.')
+    filename = lst[0]
+    postfix = lst[1]
+    response = Document.objects.filter(filename=document)
+    # if response.count() == 0:
+    #     return HttpResponse('LaTex Document does not exist')
+    # doc = response[0]
+    # if postfix != 'tex' or doc.project.type != 'LaTex':
+    #     return HttpResponse('Not a LaTex document!')
+    project_path = os.path.join(USER_FILES_DIR, random_str)
+    folder_path = os.path.join(project_path, path)
+    filepath = os.path.join(folder_path, document)
+    print(filepath)
+    if os.path.isfile(filepath):
+        tmpdirname = '/Users/winston/Dev/CS309-OOAD-SUSTex/Django/temp_'
+        os.system("mkdir %s" % os.path.join(tmpdirname, random_str))
+        tmpdirname= os.path.join(tmpdirname, random_str)
+        try:
+            print('there')
+            cmd = ['pdflatex', '-interaction=nonstopmode', '-output-directory=%s' % (tmpdirname), filepath]
+            print('what')
+            command = ""
+            for c in cmd:
+                print('i')
+                command += c + " "
+            print('here')
+            os.system(command)
+            print('here')
+        except Exception:
+            return HttpResponse('Compile fail')
+        errors = []
+        # log_file = os.path.join(tmpdirname, filename+'.log')
+        # lines = open(log_file).read().split('\r\n')
+        # for line in lines:
+        #     if line == '':
+        #         pass
+        #     else:
+        #         errors.append(line[line.rfind('/') + 1:])
+        #         return HttpResponse(json.dumps(line[line.rfind('/') + 1:]))
+
+        pdf_path = os.path.join(tmpdirname, filename + '.pdf')
+        print(pdf_path)
+        # response = FileResponse(pdf_path)
+        #         # response['Content-Type'] = 'application/pdf'
+        # pdfWriter = PyPDF2.PdfFileWriter()
+        # with open(pdf_path, 'wb') as pdfOutputFile:
+        #     pdfWriter.write(pdfOutputFile)
+        with open(pdf_path, 'rb') as pdfExtract:
+
+            response = HttpResponse(pdfExtract.read(), content_type='application/pdf')
+            return response
+
+        # response["Content-Disposition"] = "attachment; filename=%s" (filename + '.pdf')
+    return HttpResponse('LaTex Document does not exist')
